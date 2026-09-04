@@ -72,7 +72,7 @@ export class BudgetChartComponent implements AfterViewInit, OnDestroy {
               backgroundColor: [
                 '#70bdd2',
                 '#839b91',
-                '#d5a66a',
+                '#c394d8',
                 '#82dda9',
                 hasData ? '#b8cbc4' : '#29413a',
               ],
@@ -103,7 +103,7 @@ export class BudgetChartComponent implements AfterViewInit, OnDestroy {
     this.chart.data.datasets[0].backgroundColor = [
       '#70bdd2',
       '#839b91',
-      '#d5a66a',
+      '#c394d8',
       '#82dda9',
       hasData ? '#b8cbc4' : '#29413a',
     ];

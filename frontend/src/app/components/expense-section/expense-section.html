@@ -6,13 +6,51 @@
   <div class="section-title">
     <div>
       <p class="eyebrow">{{ eyebrow() }}</p>
-      <h3>{{ title() }}</h3>
+      <h3 class="section-heading-title">
+        @switch (section()) {
+          @case ('mandatory') {
+            <svg
+              class="section-icon mandatory-icon"
+              lucideReceipt
+              aria-hidden="true"
+              size="16"
+            ></svg>
+          }
+          @case ('variable') {
+            <svg
+              class="section-icon variable-icon"
+              lucideShoppingCart
+              aria-hidden="true"
+              size="16"
+            ></svg>
+          }
+          @case ('pleasure') {
+            <svg
+              class="section-icon pleasure-icon"
+              lucideSparkles
+              aria-hidden="true"
+              size="16"
+            ></svg>
+          }
+          @case ('investment') {
+            <svg
+              class="section-icon investment-icon"
+              lucideTrendingUp
+              aria-hidden="true"
+              size="16"
+            ></svg>
+          }
+        }
+        {{ title() }}
+      </h3>
       <p>{{ description() }}</p>
     </div>
     <button
       class="add-button"
-      [class.warm]="section() === 'pleasure'"
+      [class.mandatory]="section() === 'mandatory'"
       [class.variable]="section() === 'variable'"
+      [class.pleasure]="section() === 'pleasure'"
+      [class.investment]="section() === 'investment'"
       type="button"
       (click)="add.emit()"
       [attr.aria-label]="'Ajouter à ' + title()"
@@ -37,9 +75,11 @@
           </div>
           <strong
             class="entry-amount"
-            [class.warm-text]="section() === 'pleasure'"
+            [class.mandatory-text]="section() === 'mandatory'"
             [class.variable-text]="section() === 'variable'"
-            >- {{ formatAmount(entry.amount) }}</strong
+            [class.pleasure-text]="section() === 'pleasure'"
+            [class.investment-text]="section() === 'investment'"
+            >- <span class="entry-amount-value">{{ formatAmount(entry.amount) }}</span></strong
           ><button
             class="edit-button"
             type="button"

@@ -36,20 +36,18 @@
             (click)="changeMonth(-1)"
             aria-label="Mois précédent"
           >
-            ‹</button
-          ><button
+            <svg lucideChevronLeft aria-hidden="true" size="17"></svg>
+          </button>
+          <button
             class="month-button"
             type="button"
             (click)="changeMonth(1)"
             aria-label="Mois suivant"
           >
-            ›</button
-          ><button
-            class="month-button import-button"
-            type="button"
-            (click)="openImportModal('all')"
-          >
-            Importation
+            <svg lucideChevronRight aria-hidden="true" size="17"></svg>
+          </button>
+          <button class="month-button import-button" type="button" (click)="openImportModal('all')">
+            <svg class="upload-icon" lucideUpload aria-hidden="true" size="15"></svg>Import
           </button>
         </div>
       </div>
@@ -57,7 +55,10 @@
         <div class="section-heading">
           <div>
             <p class="eyebrow">01 / Revenu principal</p>
-            <h3>Salaire</h3>
+            <h3 class="section-heading-title">
+              <svg class="section-icon salary-icon" lucideWallet aria-hidden="true" size="17"></svg>
+              Salaire
+            </h3>
             <p class="section-copy">Votre point de départ pour construire un mois serein.</p>
           </div>
           <div class="salary-editor">

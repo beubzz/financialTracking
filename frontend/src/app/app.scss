@@ -223,7 +223,6 @@ h3 {
   display: flex;
   align-items: end;
   justify-content: space-between;
-  margin-bottom: 30px;
 }
 .month-row h2 {
   font-size: 29px;
@@ -630,10 +629,25 @@ h3 {
 .add-button:hover {
   background: #234237;
 }
-.add-button.warm {
-  border-color: #725b3b;
-  color: #e2ba7e;
-  background: #2a241a;
+.add-button.mandatory {
+  border-color: #41677a;
+  color: #9bc8df;
+  background: #182d36;
+}
+.add-button.variable {
+  border-color: #3d6670;
+  color: #79b8c8;
+  background: #1b2d32;
+}
+.add-button.pleasure {
+  border-color: #604b69;
+  color: #c394d8;
+  background: #2a2230;
+}
+.add-button.investment {
+  border-color: #48715d;
+  color: #82dda9;
+  background: #172a23;
 }
 .entry-list {
   border-top: 1px solid #253130;
@@ -656,8 +670,8 @@ h3 {
   box-shadow: 0 0 0 4px #1d353d;
 }
 .pleasure-bullet {
-  background: #d5a66a;
-  box-shadow: 0 0 0 4px #3d3020;
+  background: #c394d8;
+  box-shadow: 0 0 0 4px #392c40;
 }
 .entry-name {
   display: grid;
@@ -678,8 +692,17 @@ h3 {
   font-family: 'DM Mono', monospace;
   font-size: 11px;
 }
-.warm-text {
-  color: #d5a66a;
+.mandatory-text .entry-amount-value {
+  color: #70bdd2;
+}
+.variable-text .entry-amount-value {
+  color: #79b8c8;
+}
+.pleasure-text .entry-amount-value {
+  color: #c394d8;
+}
+.investment-text .entry-amount-value {
+  color: #82dda9;
 }
 .delete-button {
   margin-right: 3px;
@@ -827,7 +850,7 @@ h3 {
   background: #70bdd2;
 }
 .pleasure-dot {
-  background: #d5a66a;
+  background: #c394d8;
 }
 .invest-dot {
   background: #82dda9;
@@ -1063,9 +1086,6 @@ fieldset {
 .content-inner {
   max-width: 1240px;
 }
-.month-row {
-  margin-bottom: 38px;
-}
 .month-row h2 {
   color: #f4fbf7;
   font-size: clamp(30px, 4vw, 48px);
@@ -1110,6 +1130,43 @@ fieldset {
   margin-top: 10px;
   font-size: 28px;
   letter-spacing: -0.055em;
+}
+.section-heading-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.section-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 27px;
+  height: 27px;
+  border: 1px solid currentColor;
+  border-radius: 6px;
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  line-height: 1;
+  padding: 4px;
+}
+.salary-icon {
+  color: #9bc8df;
+  background: rgb(112 189 210 / 12%);
+}
+.mandatory-icon {
+  color: #70bdd2;
+  background: rgb(112 189 210 / 10%);
+}
+.variable-icon {
+  color: #79b8c8;
+  background: rgb(121 184 200 / 10%);
+}
+.pleasure-icon {
+  color: #c394d8;
+  background: rgb(195 148 216 / 10%);
+}
+.investment-icon {
+  color: #82dda9;
+  background: rgb(130 221 169 / 10%);
 }
 .section-copy {
   max-width: 260px;
@@ -1277,6 +1334,7 @@ fieldset {
   height: 36px;
   padding: 0;
   font-size: 20px;
+  margin-bottom: 25px;
 }
 .transaction-search {
   width: min(100%, 280px);
@@ -1469,6 +1527,12 @@ fieldset {
   color: #bcebd2;
   font-size: 9px !important;
 }
+.upload-icon {
+  margin-right: 6px;
+  font-size: 15px;
+  line-height: 0;
+  vertical-align: -1px;
+}
 .import-message {
   display: block;
   min-height: 14px;
@@ -1616,49 +1680,33 @@ fieldset {
   border-color: #41677a;
   background: linear-gradient(120deg, #14232b, #101b20 64%, #162830);
 }
-.mandatory-ok .section-block {
-  border-color: #315045;
-  background: rgb(19 33 29 / 72%);
-}
 .mandatory-ok .section-title p:not(.eyebrow) {
-  color: #8aa99a;
-}
-.mandatory-ok .section-total strong {
   color: #82dda9;
 }
-.mandatory-warning .section-block {
-  border-color: #75533f;
-  background: rgb(49 32 24 / 72%);
-}
 .mandatory-warning .section-title p:not(.eyebrow) {
-  color: #d6a486;
-}
-.mandatory-warning .section-total strong {
-  color: #efad81;
+  color: #f0a06f;
 }
 .variable-block {
-  border-color: #4a4432;
-  background: rgb(25 25 20 / 72%);
+  border-color: #385862;
+  background: rgb(20 31 35 / 72%);
 }
 .pleasure-block {
   border-color: #44364b;
   background: rgb(24 21 27 / 72%);
 }
-.investment-ok .section-block {
-  border-color: #315045;
-  background: rgb(19 33 29 / 72%);
+.investment-ok .section-title p:not(.eyebrow) {
+  color: #82dda9;
 }
-.investment-warning .section-block {
-  border-color: #75533f;
-  background: rgb(49 32 24 / 72%);
+.investment-warning .section-title p:not(.eyebrow) {
+  color: #f0a06f;
 }
 .mandatory-bullet {
   background: #70bdd2;
   box-shadow: 0 0 0 4px #1d353d;
 }
 .variable-bullet {
-  background: #d6b56e;
-  box-shadow: 0 0 0 4px #3c351f;
+  background: #79b8c8;
+  box-shadow: 0 0 0 4px #243f46;
 }
 .pleasure-bullet {
   background: #c394d8;

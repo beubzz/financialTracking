@@ -5,6 +5,7 @@ import { FinanceService } from '../../finance.service';
 import { ExpenseFormComponent } from '../../components/expense-form/expense-form';
 import { ExpenseSectionComponent } from '../../components/expense-section/expense-section';
 import { BudgetChartComponent } from '../../components/budget-chart/budget-chart';
+import { LucideChevronLeft, LucideChevronRight, LucideUpload, LucideWallet } from '@lucide/angular';
 
 type ExpenseSection = 'mandatory' | 'pleasure' | 'variable' | 'investment';
 type Recurrence = 'week' | 'month' | 'year';
@@ -26,7 +27,16 @@ interface ImportEntry {
 
 @Component({
   selector: 'app-dashboard-page',
-  imports: [RouterLink, ExpenseFormComponent, ExpenseSectionComponent, BudgetChartComponent],
+  imports: [
+    RouterLink,
+    ExpenseFormComponent,
+    ExpenseSectionComponent,
+    BudgetChartComponent,
+    LucideChevronLeft,
+    LucideChevronRight,
+    LucideUpload,
+    LucideWallet,
+  ],
   templateUrl: './dashboard-page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -222,11 +232,9 @@ export class DashboardPage {
     });
   }
   protected removeExpense(id: string) {
-    this.finance
-      .deleteEntry(id)
-      .subscribe({
-        next: () => this.entries.update((entries) => entries.filter((entry) => entry.id !== id)),
-      });
+    this.finance.deleteEntry(id).subscribe({
+      next: () => this.entries.update((entries) => entries.filter((entry) => entry.id !== id)),
+    });
   }
   protected formatAmount(amount: number) {
     return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(amount);
@@ -236,12 +244,10 @@ export class DashboardPage {
   }
 
   private loadMonth() {
-    this.finance
-      .getMonth(this.currentMonth())
-      .subscribe({
-        next: ({ month }) => this.applyMonth(month),
-        error: () => this.router.navigateByUrl('/auth'),
-      });
+    this.finance.getMonth(this.currentMonth()).subscribe({
+      next: ({ month }) => this.applyMonth(month),
+      error: () => this.router.navigateByUrl('/auth'),
+    });
   }
   private applyMonth(month: {
     entries: Array<{

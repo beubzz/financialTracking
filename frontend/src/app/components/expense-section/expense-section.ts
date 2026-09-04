@@ -1,4 +1,10 @@
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
+import {
+  LucideReceipt,
+  LucideShoppingCart,
+  LucideSparkles,
+  LucideTrendingUp,
+} from '@lucide/angular';
 
 interface MoneyEntry {
   id: string;
@@ -10,6 +16,7 @@ interface MoneyEntry {
 
 @Component({
   selector: 'app-expense-section',
+  imports: [LucideReceipt, LucideShoppingCart, LucideSparkles, LucideTrendingUp],
   templateUrl: './expense-section.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

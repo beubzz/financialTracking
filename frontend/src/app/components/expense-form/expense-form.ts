@@ -8,7 +8,7 @@ type Recurrence = 'week' | 'month' | 'year';
   selector: 'app-expense-form',
   imports: [FormsModule],
   templateUrl: './expense-form.html',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ExpenseFormComponent {
   readonly section = input.required<ExpenseSection>();

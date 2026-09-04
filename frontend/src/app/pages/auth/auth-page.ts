@@ -7,7 +7,7 @@ import { AuthService } from '../../auth.service';
   selector: 'app-auth-page',
   imports: [FormsModule],
   templateUrl: './auth-page.html',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AuthPage {
   private readonly auth = inject(AuthService);
@@ -21,25 +21,59 @@ export class AuthPage {
 
   constructor() {
     const token = new URLSearchParams(window.location.search).get('token');
-    if (token) this.auth.verifyEmail(token).subscribe({ next: ({ message }) => this.message.set(message), error: () => this.error.set('Ce lien de vérification est invalide ou expiré.') });
+    if (token)
+      this.auth
+        .verifyEmail(token)
+        .subscribe({
+          next: ({ message }) => this.message.set(message),
+          error: () => this.error.set('Ce lien de vérification est invalide ou expiré.'),
+        });
   }
 
   protected submit() {
     this.busy.set(true);
     this.error.set('');
     if (this.mode() === 'forgot') {
-      this.auth.requestPasswordReset(this.email()).subscribe({ next: ({ message }) => { this.message.set(message); this.busy.set(false); }, error: (error) => this.handleError(error) });
+      this.auth.requestPasswordReset(this.email()).subscribe({
+        next: ({ message }) => {
+          this.message.set(message);
+          this.busy.set(false);
+        },
+        error: (error) => this.handleError(error),
+      });
       return;
     }
-    const request = this.mode() === 'login' ? this.auth.login(this.email(), this.password()) : this.auth.register(this.email(), this.password());
-    request.subscribe({ next: (response) => { this.auth.saveSession(response); this.busy.set(false); this.router.navigateByUrl('/dashboard'); }, error: (error) => this.handleError(error) });
+    const request =
+      this.mode() === 'login'
+        ? this.auth.login(this.email(), this.password())
+        : this.auth.register(this.email(), this.password());
+    request.subscribe({
+      next: (response) => {
+        this.auth.saveSession(response);
+        this.busy.set(false);
+        this.router.navigateByUrl('/dashboard');
+      },
+      error: (error) => this.handleError(error),
+    });
   }
 
-  protected switchMode() { this.mode.update((mode) => mode === 'login' ? 'register' : 'login'); this.error.set(''); this.message.set(''); }
-  protected openForgot() { this.mode.set('forgot'); this.error.set(''); this.message.set(''); }
+  protected switchMode() {
+    this.mode.update((mode) => (mode === 'login' ? 'register' : 'login'));
+    this.error.set('');
+    this.message.set('');
+  }
+  protected openForgot() {
+    this.mode.set('forgot');
+    this.error.set('');
+    this.message.set('');
+  }
 
   private handleError(error: { status: number; error?: { error?: string } }) {
-    this.error.set(error.status === 0 ? 'API inaccessible. Vérifie que le backend tourne sur le port 3000.' : (error.error?.error ?? 'Impossible de contacter le serveur.'));
+    this.error.set(
+      error.status === 0
+        ? 'API inaccessible. Vérifie que le backend tourne sur le port 3000.'
+        : (error.error?.error ?? 'Impossible de contacter le serveur.'),
+    );
     this.busy.set(false);
   }
 }

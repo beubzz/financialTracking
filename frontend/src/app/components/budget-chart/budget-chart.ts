@@ -1,4 +1,13 @@
-import { AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, OnDestroy, effect, input, viewChild } from '@angular/core';
+import {
+  AfterViewInit,
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef,
+  OnDestroy,
+  effect,
+  input,
+  viewChild,
+} from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { ArcElement, Chart, DoughnutController, Legend, Tooltip } from 'chart.js';
 
@@ -9,7 +18,7 @@ Chart.register(ArcElement, DoughnutController, Legend, Tooltip);
   imports: [DecimalPipe],
   templateUrl: './budget-chart.html',
   host: { class: 'budget-chart' },
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BudgetChartComponent implements AfterViewInit, OnDestroy {
   readonly salary = input.required<number>();
@@ -24,14 +33,26 @@ export class BudgetChartComponent implements AfterViewInit, OnDestroy {
 
   constructor() {
     effect(() => {
-      const values = [this.mandatory(), this.variable(), this.pleasure(), this.investment(), Math.max(this.remaining(), 0)];
+      const values = [
+        this.mandatory(),
+        this.variable(),
+        this.pleasure(),
+        this.investment(),
+        Math.max(this.remaining(), 0),
+      ];
       if (this.viewReady) this.updateChart(values);
     });
   }
 
   ngAfterViewInit() {
     this.viewReady = true;
-    this.updateChart([this.mandatory(), this.variable(), this.pleasure(), this.investment(), Math.max(this.remaining(), 0)]);
+    this.updateChart([
+      this.mandatory(),
+      this.variable(),
+      this.pleasure(),
+      this.investment(),
+      Math.max(this.remaining(), 0),
+    ]);
   }
 
   ngOnDestroy() {
@@ -45,20 +66,47 @@ export class BudgetChartComponent implements AfterViewInit, OnDestroy {
         type: 'doughnut',
         data: {
           labels: ['Obligatoire', 'Variable', 'Plaisir', 'Investissement', 'Disponible'],
-          datasets: [{ data: hasData ? values : [0, 0, 0, 0, 1], backgroundColor: ['#70bdd2', '#839b91', '#d5a66a', '#82dda9', hasData ? '#b8cbc4' : '#29413a'], borderColor: '#12201d', borderWidth: 5, hoverOffset: 8 }]
+          datasets: [
+            {
+              data: hasData ? values : [0, 0, 0, 0, 1],
+              backgroundColor: [
+                '#70bdd2',
+                '#839b91',
+                '#d5a66a',
+                '#82dda9',
+                hasData ? '#b8cbc4' : '#29413a',
+              ],
+              borderColor: '#12201d',
+              borderWidth: 5,
+              hoverOffset: 8,
+            },
+          ],
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
           cutout: '58%',
           animation: { duration: 500 },
-          plugins: { legend: { display: false }, tooltip: { callbacks: { label: (context) => ` ${context.label}: ${this.formatAmount(Number(context.raw))}` } } }
-        }
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: (context) => ` ${context.label}: ${this.formatAmount(Number(context.raw))}`,
+              },
+            },
+          },
+        },
       });
       return;
     }
     this.chart.data.datasets[0].data = hasData ? values : [0, 0, 0, 0, 1];
-    this.chart.data.datasets[0].backgroundColor = ['#70bdd2', '#839b91', '#d5a66a', '#82dda9', hasData ? '#b8cbc4' : '#29413a'];
+    this.chart.data.datasets[0].backgroundColor = [
+      '#70bdd2',
+      '#839b91',
+      '#d5a66a',
+      '#82dda9',
+      hasData ? '#b8cbc4' : '#29413a',
+    ];
     this.chart.update();
   }
 

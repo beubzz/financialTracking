@@ -1,10 +1,79 @@
-<section class="section-block" [class.pleasure-block]="section() === 'pleasure'" [class.variable-block]="section() === 'variable'">
-  <div class="section-title"><div><p class="eyebrow">{{ eyebrow() }}</p><h3>{{ title() }}</h3><p>{{ description() }}</p></div><button class="add-button" [class.warm]="section() === 'pleasure'" [class.variable]="section() === 'variable'" type="button" (click)="add.emit()" [attr.aria-label]="'Ajouter à ' + title()">+</button></div>
+<section
+  class="section-block"
+  [class.pleasure-block]="section() === 'pleasure'"
+  [class.variable-block]="section() === 'variable'"
+>
+  <div class="section-title">
+    <div>
+      <p class="eyebrow">{{ eyebrow() }}</p>
+      <h3>{{ title() }}</h3>
+      <p>{{ description() }}</p>
+    </div>
+    <button
+      class="add-button"
+      [class.warm]="section() === 'pleasure'"
+      [class.variable]="section() === 'variable'"
+      type="button"
+      (click)="add.emit()"
+      [attr.aria-label]="'Ajouter à ' + title()"
+    >
+      +
+    </button>
+  </div>
   <div class="entry-list" [class.empty-list]="!total()">
     @for (entry of entries(); track entry.id) {
-      @if (entry.section === section()) { <article class="entry-row"><span class="entry-bullet" [class.mandatory-bullet]="section() === 'mandatory'" [class.pleasure-bullet]="section() === 'pleasure'" [class.variable-bullet]="section() === 'variable'" [class.investment-bullet]="section() === 'investment'"></span><div class="entry-name"><strong>{{ entry.label }}</strong><small>Récurrent chaque {{ recurrenceLabel(entry.recurrence) }}</small></div><strong class="entry-amount" [class.warm-text]="section() === 'pleasure'" [class.variable-text]="section() === 'variable'">- {{ formatAmount(entry.amount) }}</strong><button class="edit-button" type="button" (click)="edit.emit(entry)" [attr.aria-label]="'Modifier ' + entry.label">✎</button><button class="delete-button" type="button" (click)="remove.emit(entry.id)" [attr.aria-label]="'Supprimer ' + entry.label">×</button></article> }
+      @if (entry.section === section()) {
+        <article class="entry-row">
+          <span
+            class="entry-bullet"
+            [class.mandatory-bullet]="section() === 'mandatory'"
+            [class.pleasure-bullet]="section() === 'pleasure'"
+            [class.variable-bullet]="section() === 'variable'"
+            [class.investment-bullet]="section() === 'investment'"
+          ></span>
+          <div class="entry-name">
+            <strong>{{ entry.label }}</strong
+            ><small>Récurrent chaque {{ recurrenceLabel(entry.recurrence) }}</small>
+          </div>
+          <strong
+            class="entry-amount"
+            [class.warm-text]="section() === 'pleasure'"
+            [class.variable-text]="section() === 'variable'"
+            >- {{ formatAmount(entry.amount) }}</strong
+          ><button
+            class="edit-button"
+            type="button"
+            (click)="edit.emit(entry)"
+            [attr.aria-label]="'Modifier ' + entry.label"
+          >
+            ✎</button
+          ><button
+            class="delete-button"
+            type="button"
+            (click)="remove.emit(entry.id)"
+            [attr.aria-label]="'Supprimer ' + entry.label"
+          >
+            ×
+          </button>
+        </article>
+      }
     }
-    @if (!total()) { <p class="list-empty">{{ section() === 'mandatory' ? 'Aucune dépense obligatoire pour le moment.' : (section() === 'pleasure' ? 'Ajoutez une envie ou un projet à financer.' : (section() === 'investment' ? 'Ajoutez un investissement à prévoir.' : 'Prévoyez vos dépenses d’essence, shopping ou sorties.')) }}</p> }
+    @if (!total()) {
+      <p class="list-empty">
+        {{
+          section() === 'mandatory'
+            ? 'Aucune dépense obligatoire pour le moment.'
+            : section() === 'pleasure'
+              ? 'Ajoutez une envie ou un projet à financer.'
+              : section() === 'investment'
+                ? 'Ajoutez un investissement à prévoir.'
+                : 'Prévoyez vos dépenses d’essence, shopping ou sorties.'
+        }}
+      </p>
+    }
   </div>
-  <div class="section-total"><span>{{ title() }}</span><strong>{{ formatAmount(total()) }}</strong></div>
+  <div class="section-total">
+    <span>{{ title() }}</span
+    ><strong>{{ formatAmount(total()) }}</strong>
+  </div>
 </section>

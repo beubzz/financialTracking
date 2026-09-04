@@ -105,4 +105,5 @@ enum EntrySection {
   MANDATORY
   PLEASURE
   VARIABLE
+  INVESTMENT
 }

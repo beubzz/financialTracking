@@ -1,0 +1,1 @@
+ALTER TYPE "EntrySection" ADD VALUE 'INVESTMENT';

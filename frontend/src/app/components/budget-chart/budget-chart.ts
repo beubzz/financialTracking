@@ -16,6 +16,7 @@ export class BudgetChartComponent implements AfterViewInit, OnDestroy {
   readonly mandatory = input.required<number>();
   readonly variable = input.required<number>();
   readonly pleasure = input.required<number>();
+  readonly investment = input.required<number>();
   readonly remaining = input.required<number>();
   private readonly canvas = viewChild.required<ElementRef<HTMLCanvasElement>>('canvas');
   private chart?: Chart<'doughnut'>;
@@ -23,14 +24,14 @@ export class BudgetChartComponent implements AfterViewInit, OnDestroy {
 
   constructor() {
     effect(() => {
-      const values = [this.mandatory(), this.variable(), this.pleasure(), Math.max(this.remaining(), 0)];
+      const values = [this.mandatory(), this.variable(), this.pleasure(), this.investment(), Math.max(this.remaining(), 0)];
       if (this.viewReady) this.updateChart(values);
     });
   }
 
   ngAfterViewInit() {
     this.viewReady = true;
-    this.updateChart([this.mandatory(), this.variable(), this.pleasure(), Math.max(this.remaining(), 0)]);
+    this.updateChart([this.mandatory(), this.variable(), this.pleasure(), this.investment(), Math.max(this.remaining(), 0)]);
   }
 
   ngOnDestroy() {
@@ -43,8 +44,8 @@ export class BudgetChartComponent implements AfterViewInit, OnDestroy {
       this.chart = new Chart(this.canvas().nativeElement, {
         type: 'doughnut',
         data: {
-          labels: ['Obligatoire', 'Variable', 'Plaisir', 'À investir'],
-          datasets: [{ data: hasData ? values : [0, 0, 0, 1], backgroundColor: ['#70bdd2', '#e5b86f', '#d5a66a', hasData ? '#82dda9' : '#29413a'], borderColor: '#12201d', borderWidth: 5, hoverOffset: 8 }]
+          labels: ['Obligatoire', 'Variable', 'Plaisir', 'Investissement', 'Disponible'],
+          datasets: [{ data: hasData ? values : [0, 0, 0, 0, 1], backgroundColor: ['#70bdd2', '#839b91', '#d5a66a', '#82dda9', hasData ? '#b8cbc4' : '#29413a'], borderColor: '#12201d', borderWidth: 5, hoverOffset: 8 }]
         },
         options: {
           responsive: true,
@@ -56,8 +57,8 @@ export class BudgetChartComponent implements AfterViewInit, OnDestroy {
       });
       return;
     }
-    this.chart.data.datasets[0].data = hasData ? values : [0, 0, 0, 1];
-    this.chart.data.datasets[0].backgroundColor = ['#70bdd2', '#e5b86f', '#d5a66a', hasData ? '#82dda9' : '#29413a'];
+    this.chart.data.datasets[0].data = hasData ? values : [0, 0, 0, 0, 1];
+    this.chart.data.datasets[0].backgroundColor = ['#70bdd2', '#839b91', '#d5a66a', '#82dda9', hasData ? '#b8cbc4' : '#29413a'];
     this.chart.update();
   }
 

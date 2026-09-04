@@ -8,13 +8,14 @@ const router = Router();
 const entrySchema = z.object({
   label: z.string().trim().min(1).max(120),
   amount: z.coerce.number().positive().max(100000000),
-  section: z.enum(['mandatory', 'pleasure', 'variable']),
+  section: z.enum(['mandatory', 'pleasure', 'variable', 'investment']),
   recurrence: z.enum(['week', 'month', 'year']),
   category: z.string().trim().max(60).optional(),
   note: z.string().trim().max(500).optional(),
   occurredAt: z.string().datetime().optional(),
 });
 const entryUpdateSchema = entrySchema.partial().refine((value) => Object.keys(value).length > 0);
+const importSelectionSchema = z.object({ selectedIds: z.array(z.string()).default([]) });
 const goalSchema = z.object({ name: z.string().trim().min(1).max(120), target: z.coerce.number().positive().max(100000000), saved: z.coerce.number().min(0).max(100000000).default(0), targetDate: z.string().datetime().optional() });
 const salarySchema = z.object({ amount: z.coerce.number().positive().max(100000000) });
 
@@ -55,10 +56,42 @@ router.post('/entries', async (request: AuthenticatedRequest, response) => {
   const parsed = entrySchema.safeParse(request.body);
   if (!parsed.success) return response.status(400).json({ error: 'Invalid financial entry' });
   const month = await getOrCreateMonth(request.userId!, monthStart(request.query.month as string | undefined));
-  const section = parsed.data.section === 'mandatory' ? 'MANDATORY' : parsed.data.section === 'pleasure' ? 'PLEASURE' : 'VARIABLE';
-  const entryData: Prisma.MoneyEntryUncheckedCreateInput = { monthId: month.id, label: parsed.data.label, amount: parsed.data.amount, type: 'EXPENSE', section, recurrence: parsed.data.recurrence.toUpperCase() as 'WEEK' | 'MONTH' | 'YEAR', category: parsed.data.category, note: parsed.data.note, occurredAt: parsed.data.occurredAt ? new Date(parsed.data.occurredAt) : undefined };
+  const section = parsed.data.section === 'mandatory' ? 'MANDATORY' : parsed.data.section === 'pleasure' ? 'PLEASURE' : parsed.data.section === 'investment' ? 'INVESTMENT' : 'VARIABLE';
+  const entryData: Prisma.MoneyEntryUncheckedCreateInput = { monthId: month.id, label: parsed.data.label, amount: parsed.data.amount, type: 'EXPENSE', section, recurrence: parsed.data.recurrence.toUpperCase() as 'WEEK' | 'MONTH' | 'YEAR', isRecurring: true, category: parsed.data.category, note: parsed.data.note, occurredAt: parsed.data.occurredAt ? new Date(parsed.data.occurredAt) : undefined };
   const entry = await prisma.moneyEntry.create({ data: entryData });
   return response.status(201).json({ entry });
+});
+
+async function findImportCandidates(userId: string, targetDate: Date, sourceDate: Date, importAll: boolean) {
+  const [source, target] = await Promise.all([
+    prisma.financialMonth.findUnique({ where: { userId_month: { userId, month: sourceDate } }, include: { entries: true } }),
+    getOrCreateMonth(userId, targetDate),
+  ]);
+  if (!source) return { target, candidates: [] as typeof target.entries };
+  const existingLabels = new Set(target.entries.map((entry) => entry.label));
+  const candidates = source.entries.filter((entry) => entry.type === 'EXPENSE' && (importAll || (entry.section === 'MANDATORY' && (entry.isRecurring || entry.recurrence))) && !existingLabels.has(entry.label));
+  return { target, candidates };
+}
+
+router.get('/entries/import-candidates', async (request: AuthenticatedRequest, response) => {
+  const targetDate = monthStart(request.query.month as string | undefined);
+  const sourceDate = request.query.sourceMonth ? monthStart(request.query.sourceMonth as string) : new Date(Date.UTC(targetDate.getUTCFullYear(), targetDate.getUTCMonth() - 1, 1));
+  const { candidates } = await findImportCandidates(request.userId!, targetDate, sourceDate, request.query.mode === 'all');
+  return response.json({ entries: candidates });
+});
+
+router.post('/entries/import-recurring', async (request: AuthenticatedRequest, response) => {
+  const parsed = importSelectionSchema.safeParse(request.body);
+  if (!parsed.success) return response.status(400).json({ error: 'Invalid import selection' });
+  const targetDate = monthStart(request.query.month as string | undefined);
+  const sourceDate = request.query.sourceMonth ? monthStart(request.query.sourceMonth as string) : new Date(Date.UTC(targetDate.getUTCFullYear(), targetDate.getUTCMonth() - 1, 1));
+  const importAll = request.query.mode === 'all';
+  const { target, candidates } = await findImportCandidates(request.userId!, targetDate, sourceDate, importAll);
+  const selectedIds = new Set(parsed.data.selectedIds);
+  const selectedCandidates = candidates.filter((entry) => selectedIds.has(entry.id));
+  if (selectedCandidates.length) await prisma.moneyEntry.createMany({ data: selectedCandidates.map((entry) => ({ monthId: target.id, label: entry.label, amount: entry.amount, type: entry.type, section: entry.section, recurrence: entry.recurrence, isRecurring: entry.isRecurring, category: entry.category, note: entry.note })) });
+  const month = await prisma.financialMonth.findUniqueOrThrow({ where: { id: target.id }, include: { entries: { orderBy: { createdAt: 'asc' } } } });
+  return response.json({ imported: selectedCandidates.length, month });
 });
 
 router.patch('/entries/:id', async (request: AuthenticatedRequest, response) => {
@@ -68,7 +101,7 @@ router.patch('/entries/:id', async (request: AuthenticatedRequest, response) => 
   const existing = await prisma.moneyEntry.findFirst({ where: { id: entryId, type: 'EXPENSE', month: { userId: request.userId } } });
   if (!existing) return response.status(404).json({ error: 'Entry not found' });
   const { section, recurrence, occurredAt, ...rest } = parsed.data;
-  const entry = await prisma.moneyEntry.update({ where: { id: existing.id }, data: { ...rest, ...(section ? { section: section === 'mandatory' ? 'MANDATORY' : section === 'pleasure' ? 'PLEASURE' : 'VARIABLE' } : {}), ...(recurrence ? { recurrence: recurrence.toUpperCase() as 'WEEK' | 'MONTH' | 'YEAR' } : {}), ...(occurredAt ? { occurredAt: new Date(occurredAt) } : {}) } });
+  const entry = await prisma.moneyEntry.update({ where: { id: existing.id }, data: { ...rest, ...(section ? { section: section === 'mandatory' ? 'MANDATORY' : section === 'pleasure' ? 'PLEASURE' : section === 'investment' ? 'INVESTMENT' : 'VARIABLE' } : {}), ...(recurrence ? { recurrence: recurrence.toUpperCase() as 'WEEK' | 'MONTH' | 'YEAR' } : {}), ...(occurredAt ? { occurredAt: new Date(occurredAt) } : {}) } });
   return response.json({ entry });
 });
 

@@ -8,7 +8,7 @@ const router = Router();
 const entrySchema = z.object({
   label: z.string().trim().min(1).max(120),
   amount: z.coerce.number().positive().max(100000000),
-  section: z.enum(['mandatory', 'pleasure']),
+  section: z.enum(['mandatory', 'pleasure', 'variable']),
   recurrence: z.enum(['week', 'month', 'year']),
 });
 const salarySchema = z.object({ amount: z.coerce.number().positive().max(100000000) });
@@ -50,7 +50,8 @@ router.post('/entries', async (request: AuthenticatedRequest, response) => {
   const parsed = entrySchema.safeParse(request.body);
   if (!parsed.success) return response.status(400).json({ error: 'Invalid financial entry' });
   const month = await getOrCreateMonth(request.userId!, monthStart(request.query.month as string | undefined));
-  const entryData: Prisma.MoneyEntryUncheckedCreateInput = { monthId: month.id, label: parsed.data.label, amount: parsed.data.amount, type: 'EXPENSE', section: parsed.data.section === 'mandatory' ? 'MANDATORY' : 'PLEASURE', recurrence: parsed.data.recurrence.toUpperCase() as 'WEEK' | 'MONTH' | 'YEAR' };
+  const section = parsed.data.section === 'mandatory' ? 'MANDATORY' : parsed.data.section === 'pleasure' ? 'PLEASURE' : 'VARIABLE';
+  const entryData: Prisma.MoneyEntryUncheckedCreateInput = { monthId: month.id, label: parsed.data.label, amount: parsed.data.amount, type: 'EXPENSE', section, recurrence: parsed.data.recurrence.toUpperCase() as 'WEEK' | 'MONTH' | 'YEAR' };
   const entry = await prisma.moneyEntry.create({ data: entryData });
   return response.status(201).json({ entry });
 });

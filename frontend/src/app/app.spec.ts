@@ -16,11 +16,10 @@ describe('App', () => {
     expect(app).toBeTruthy();
   });
 
-  it('should render the authentication screen', async () => {
+  it('should expose the router outlet', async () => {
     const fixture = TestBed.createComponent(App);
     await fixture.whenStable();
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('Bon retour parmi nous');
-    expect(compiled.querySelector('button')?.textContent).toContain('Se connecter');
+    expect(compiled.querySelector('router-outlet')).toBeTruthy();
   });
 });

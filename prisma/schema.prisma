@@ -87,4 +87,5 @@ enum Recurrence {
 enum EntrySection {
   MANDATORY
   PLEASURE
+  VARIABLE
 }

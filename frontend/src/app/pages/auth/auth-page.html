@@ -1,0 +1,21 @@
+<main class="auth-shell">
+  <section class="auth-card">
+    <div class="brand auth-brand"><span class="brand-mark">$</span><span>Ledgerly</span></div>
+    <p class="eyebrow">Votre espace financier</p>
+    <h1>{{ mode() === 'login' ? 'Bon retour parmi nous' : (mode() === 'register' ? 'Créer votre espace' : 'Réinitialiser votre mot de passe') }}</h1>
+    <p class="auth-subtitle">{{ mode() === 'login' ? 'Retrouvez votre équilibre financier.' : (mode() === 'register' ? 'Commencez à suivre vos finances sereinement.' : 'Recevez un lien sécurisé par e-mail.') }}</p>
+    <form (ngSubmit)="submit()">
+      <label class="field-label" for="auth-email">Adresse e-mail</label>
+      <input class="text-input" id="auth-email" name="email" type="email" [ngModel]="email()" (ngModelChange)="email.set($event)" required autocomplete="email" placeholder="vous@exemple.com">
+      @if (mode() !== 'forgot') {
+        <label class="field-label" for="auth-password">Mot de passe</label>
+        <input class="text-input" id="auth-password" name="password" type="password" [ngModel]="password()" (ngModelChange)="password.set($event)" required minlength="8" autocomplete="current-password" placeholder="8 caractères minimum">
+      }
+      <p class="auth-error" role="alert">{{ error() }}</p>
+      <p class="auth-message">{{ message() }}</p>
+      <button class="primary-button auth-submit" type="submit" [disabled]="busy()">{{ busy() ? 'Chargement...' : (mode() === 'login' ? 'Se connecter' : (mode() === 'register' ? "S'inscrire" : 'Envoyer le lien')) }}</button>
+    </form>
+    @if (mode() === 'login') { <button class="auth-forgot" type="button" (click)="openForgot()">Mot de passe oublié ?</button> }
+    <button class="auth-switch" type="button" (click)="switchMode()">{{ mode() === 'register' ? 'J’ai déjà un compte' : 'Créer un compte' }}</button>
+  </section>
+</main>

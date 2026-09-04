@@ -5,7 +5,12 @@ import authRouter from './routes/auth.js';
 import financeRouter from './routes/finance.js';
 
 const app = express();
-app.use(cors({ origin: env.FRONTEND_URL }));
+const allowedOrigins = new Set([env.FRONTEND_URL, 'http://localhost:4200', 'http://localhost:4201']);
+app.use(cors({ origin: (origin, callback) => {
+  const isLocalOrigin = origin ? /^https?:\/\/(localhost|127\.0\.0\.1):\d+$/.test(origin) : true;
+  if (!origin || allowedOrigins.has(origin) || isLocalOrigin) return callback(null, true);
+  return callback(new Error('Origin not allowed by CORS'));
+} }));
 app.use(express.json());
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/finance', financeRouter);

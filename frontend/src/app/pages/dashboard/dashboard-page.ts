@@ -28,6 +28,7 @@ export class DashboardPage {
   protected readonly formAmount = signal<number | null>(null);
   protected readonly formRecurrence = signal<Recurrence>('month');
   protected readonly formSection = signal<ExpenseSection>('mandatory');
+  protected readonly currentMonth = signal(new Date().toISOString().slice(0, 7));
   protected readonly totalMandatory = computed(() => this.entries().filter((entry) => entry.section === 'mandatory').reduce((total, entry) => total + entry.amount, 0));
   protected readonly totalPleasure = computed(() => this.entries().filter((entry) => entry.section === 'pleasure').reduce((total, entry) => total + entry.amount, 0));
   protected readonly totalVariable = computed(() => this.entries().filter((entry) => entry.section === 'variable').reduce((total, entry) => total + entry.amount, 0));
@@ -38,6 +39,8 @@ export class DashboardPage {
   constructor() { this.loadMonth(); }
 
   protected logout() { this.auth.logout(); this.router.navigateByUrl('/auth'); }
+  protected changeMonth(offset: number) { const [year, month] = this.currentMonth().split('-').map(Number); const date = new Date(Date.UTC(year, month - 1 + offset, 1)); this.currentMonth.set(date.toISOString().slice(0, 7)); this.loadMonth(); }
+  protected monthLabel() { return new Intl.DateTimeFormat('fr-FR', { month: 'long', year: 'numeric' }).format(new Date(`${this.currentMonth()}-01T00:00:00`)); }
   protected openExpenseForm(section: ExpenseSection) { this.formSection.set(section); this.showExpenseForm.set(true); }
   protected closeExpenseForm() { this.showExpenseForm.set(false); this.formLabel.set(''); this.formAmount.set(null); this.formRecurrence.set('month'); }
   protected updateSalaryDraft(event: Event) { const value = Number((event.target as HTMLInputElement).value); this.salaryDraft.set(Number.isFinite(value) && value >= 0 ? value : 0); }
@@ -47,5 +50,5 @@ export class DashboardPage {
   protected formatAmount(amount: number) { return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(amount); }
   protected recurrenceLabel(recurrence: Recurrence) { return { week: 'semaine', month: 'mois', year: 'année' }[recurrence]; }
 
-  private loadMonth() { this.finance.getMonth().subscribe({ next: ({ month }) => { const salary = month.entries.find((entry) => entry.type === 'INCOME'); const amount = salary ? Number(salary.amount) : 0; this.salary.set(amount); this.salaryDraft.set(amount); this.entries.set(month.entries.filter((entry) => entry.type === 'EXPENSE').map((entry) => ({ id: entry.id, label: entry.label, amount: Number(entry.amount), recurrence: entry.recurrence.toLowerCase() as Recurrence, section: entry.section.toLowerCase() as ExpenseSection }))); }, error: () => this.router.navigateByUrl('/auth') }); }
+  private loadMonth() { this.finance.getMonth(this.currentMonth()).subscribe({ next: ({ month }) => { const salary = month.entries.find((entry) => entry.type === 'INCOME'); const amount = salary ? Number(salary.amount) : 0; this.salary.set(amount); this.salaryDraft.set(amount); this.entries.set(month.entries.filter((entry) => entry.type === 'EXPENSE').map((entry) => ({ id: entry.id, label: entry.label, amount: Number(entry.amount), recurrence: entry.recurrence.toLowerCase() as Recurrence, section: entry.section.toLowerCase() as ExpenseSection }))); }, error: () => this.router.navigateByUrl('/auth') }); }
 }

@@ -16,6 +16,7 @@ model User {
   createdAt    DateTime        @default(now())
   updatedAt    DateTime        @updatedAt
   months       FinancialMonth[]
+  goals        Goal[]
   verificationTokens VerificationToken[]
   passwordResetTokens PasswordResetToken[]
 }
@@ -61,6 +62,8 @@ model MoneyEntry {
   amount      Decimal        @db.Decimal(12, 2)
   type        EntryType
   category    String?
+  note        String?
+  occurredAt DateTime?
   isRecurring Boolean        @default(false)
   recurrence  Recurrence     @default(MONTH)
   section     EntrySection   @default(MANDATORY)
@@ -71,6 +74,20 @@ model MoneyEntry {
 
   @@index([monthId, type])
   @@unique([monthId, label])
+}
+
+model Goal {
+  id          String   @id @default(cuid())
+  name        String
+  target      Decimal  @db.Decimal(12, 2)
+  saved       Decimal  @default(0) @db.Decimal(12, 2)
+  targetDate  DateTime?
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId, targetDate])
 }
 
 enum EntryType {

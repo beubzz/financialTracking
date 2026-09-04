@@ -3,15 +3,15 @@
     <div class="brand"><span class="brand-mark">$</span><span>Ledgerly</span></div>
     <nav aria-label="Navigation principale">
       <a class="nav-item active" routerLink="/dashboard"><span aria-hidden="true">◈</span>Vue d'ensemble</a>
-      <a class="nav-item" routerLink="/dashboard"><span aria-hidden="true">▤</span>Transactions</a>
-      <a class="nav-item" routerLink="/dashboard"><span aria-hidden="true">⌁</span>Objectifs</a>
+      <a class="nav-item" routerLink="/transactions"><span aria-hidden="true">▤</span>Transactions</a>
+      <a class="nav-item" routerLink="/objectifs"><span aria-hidden="true">⌁</span>Objectifs</a>
     </nav>
     <div class="sidebar-footer"><span class="status-dot"></span>Synchronisation active</div>
   </aside>
   <section class="content-area">
     <header class="topbar"><div><p class="eyebrow">Vendredi 4 septembre 2026</p><h1>Bonjour, Thomas</h1></div><button class="profile-button" type="button" (click)="logout()" aria-label="Se déconnecter"><span>TB</span><strong>Se déconnecter</strong><small>↪</small></button></header>
     <div class="content-inner">
-      <div class="month-row"><div><p class="eyebrow">Votre espace financier</p><h2>Septembre 2026</h2></div><button class="month-button" type="button">‹ <span>Mois précédent</span></button></div>
+      <div class="month-row"><div><p class="eyebrow">Votre espace financier</p><h2>{{ monthLabel() }}</h2></div><div class="month-controls"><button class="month-button" type="button" (click)="changeMonth(-1)" aria-label="Mois précédent">‹</button><button class="month-button" type="button" (click)="changeMonth(1)" aria-label="Mois suivant">›</button></div></div>
       <section class="salary-section panel">
         <div class="section-heading"><div><p class="eyebrow">01 / Revenu principal</p><h3>Salaire</h3><p class="section-copy">Votre point de départ pour construire un mois serein.</p></div><div class="salary-editor"><label for="salary-input">Montant net mensuel</label><div class="salary-input-wrap"><input id="salary-input" type="number" [value]="salaryDraft()" (input)="updateSalaryDraft($event)" (blur)="saveSalary()" min="0" step="0.01" aria-label="Salaire net mensuel"><span>€</span></div><small class="salary-hint">Mis à jour automatiquement</small></div></div>
         <div class="salary-summary"><div class="summary-metric available-metric"><span>Revenu disponible ce mois</span><strong [class.negative-amount]="remaining() < 0">{{ formatAmount(remaining()) }}</strong></div><div class="salary-line"><i [style.width.%]="investRate()"></i></div><small>{{ formatAmount(totalExpenses()) }} de dépenses prévues · {{ investRate() }}% reste disponible</small></div>

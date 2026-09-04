@@ -4,6 +4,7 @@ import { AuthService } from '../../auth.service';
 import { FinanceService } from '../../finance.service';
 import { ExpenseFormComponent } from '../../components/expense-form/expense-form';
 import { ExpenseSectionComponent } from '../../components/expense-section/expense-section';
+import { BudgetChartComponent } from '../../components/budget-chart/budget-chart';
 
 type ExpenseSection = 'mandatory' | 'pleasure' | 'variable';
 type Recurrence = 'week' | 'month' | 'year';
@@ -11,7 +12,7 @@ interface MoneyEntry { id: string; label: string; amount: number; recurrence: Re
 
 @Component({
   selector: 'app-dashboard-page',
-  imports: [RouterLink, ExpenseFormComponent, ExpenseSectionComponent],
+  imports: [RouterLink, ExpenseFormComponent, ExpenseSectionComponent, BudgetChartComponent],
   templateUrl: './dashboard-page.html',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
@@ -30,9 +31,9 @@ export class DashboardPage {
   protected readonly totalMandatory = computed(() => this.entries().filter((entry) => entry.section === 'mandatory').reduce((total, entry) => total + entry.amount, 0));
   protected readonly totalPleasure = computed(() => this.entries().filter((entry) => entry.section === 'pleasure').reduce((total, entry) => total + entry.amount, 0));
   protected readonly totalVariable = computed(() => this.entries().filter((entry) => entry.section === 'variable').reduce((total, entry) => total + entry.amount, 0));
-  protected readonly remaining = computed(() => Math.max(this.salary() - this.totalMandatory() - this.totalPleasure() - this.totalVariable(), 0));
-  protected readonly investRate = computed(() => this.salary() ? Math.round((this.remaining() / this.salary()) * 100) : 0);
-  protected readonly chartBackground = computed(() => { const salary = this.salary(); const mandatory = salary ? Math.round((this.totalMandatory() / salary) * 100) : 0; const variable = salary ? Math.round((this.totalVariable() / salary) * 100) : 0; const pleasure = salary ? Math.round((this.totalPleasure() / salary) * 100) : 0; return `conic-gradient(#70bdd2 0 ${mandatory}%, #e5b86f ${mandatory}% ${mandatory + variable}%, #d5a66a ${mandatory + variable}% ${mandatory + variable + pleasure}%, #82dda9 ${mandatory + variable + pleasure}% 100%)`; });
+  protected readonly totalExpenses = computed(() => this.totalMandatory() + this.totalVariable() + this.totalPleasure());
+  protected readonly remaining = computed(() => this.salary() - this.totalExpenses());
+  protected readonly investRate = computed(() => this.salary() ? Math.max(Math.round((this.remaining() / this.salary()) * 100), 0) : 0);
 
   constructor() { this.loadMonth(); }
 

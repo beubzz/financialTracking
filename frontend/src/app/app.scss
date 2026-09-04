@@ -28,7 +28,7 @@ nav { display: grid; gap: 8px; }
 .content-inner { max-width: 1240px; }
 .month-row { margin-bottom: 38px; }
 .month-row h2 { color: #f4fbf7; font-size: clamp(30px, 4vw, 48px); letter-spacing: -.06em; }
-.salary-section { position: relative; display: grid; grid-template-columns: minmax(300px, 1fr) minmax(350px, .9fr); gap: 22px 50px; overflow: hidden; padding: 38px 42px 34px; border: 1px solid #2d5545; border-radius: 18px; background: linear-gradient(120deg, #14241f, #101b19 64%, #162a22); box-shadow: 0 24px 70px rgb(0 0 0 / 18%); }
+.salary-section { position: relative; display: grid; grid-template-columns: minmax(250px, .7fr) minmax(470px, 1.3fr); gap: 22px 38px; overflow: hidden; padding: 38px 42px 34px; border: 1px solid #2d5545; border-radius: 18px; background: linear-gradient(120deg, #14241f, #101b19 64%, #162a22); box-shadow: 0 24px 70px rgb(0 0 0 / 18%); }
 .salary-section::after { position: absolute; width: 280px; height: 280px; right: -100px; top: -130px; border: 1px solid rgb(143 229 189 / 16%); border-radius: 50%; content: ''; }
 .section-heading { position: relative; z-index: 1; display: block; }
 .salary-section h3 { margin-top: 10px; font-size: 28px; letter-spacing: -.055em; }
@@ -41,9 +41,24 @@ nav { display: grid; gap: 8px; }
 .salary-hint { display: block; margin-top: 12px; color: #638078; font-family: 'DM Mono', monospace; font-size: 9px; text-transform: uppercase; letter-spacing: .04em; }
 .salary-summary { grid-column: 1; margin-top: 0; align-self: end; }
 .salary-summary > strong { font-size: 32px; }
+.salary-summary { display: grid; grid-template-columns: 1fr 1fr; gap: 18px 24px; }
+.summary-metric { display: grid; gap: 8px; padding: 16px 18px; border: 1px solid rgb(110 145 132 / 22%); border-radius: 10px; background: rgb(7 16 13 / 22%); }
+.summary-metric span { color: #78958a; font-family: 'DM Mono', monospace; font-size: 9px; text-transform: uppercase; letter-spacing: .04em; }
+.summary-metric strong { color: #f0f7f3; font-size: clamp(23px, 3vw, 32px); letter-spacing: -.06em; }
+.available-metric { border-color: rgb(130 221 169 / 38%); background: rgb(130 221 169 / 7%); }
+.available-metric strong { color: #82dda9; }
+.negative-amount { color: #ef958b !important; }
+.salary-summary .salary-line { grid-column: 1 / -1; }
+.salary-summary > small { grid-column: 1 / -1; }
 .salary-pie { grid-column: 2; grid-row: 1 / span 2; align-self: center; justify-content: center; gap: 30px; margin: 0; padding: 18px 0; }
-.pie-chart { width: 260px; height: 260px; box-shadow: 0 0 0 9px rgb(143 229 189 / 4%), 0 18px 40px rgb(0 0 0 / 20%); }
-.pie-hole { width: 158px; height: 158px; background: #12201d; box-shadow: inset 0 0 0 1px #2c4c40; }
+.pie-chart { width: 256px; height: 256px; box-shadow: 0 0 0 9px rgb(143 229 189 / 4%), 0 18px 40px rgb(0 0 0 / 20%); }
+.pie-hole { width: 126px; height: 126px; background: #12201d; box-shadow: inset 0 0 0 1px #2c4c40; }
+.budget-chart { display: block; flex: 0 0 256px; width: 256px; height: 256px; }
+.budget-chart-canvas { position: relative; width: 256px; height: 256px; }
+.budget-chart-canvas canvas { display: block; width: 256px !important; height: 256px !important; }
+.budget-chart-center { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; pointer-events: none; }
+.budget-chart-center strong { color: #eef8f3; font-family: 'DM Mono', monospace; font-size: 17px; }
+.budget-chart-center small { margin-top: 4px; color: #78958a; font-family: 'DM Mono', monospace; font-size: 8px; text-transform: uppercase; }
 .pie-hole strong { font-size: 18px; }
 .pie-legend { min-width: 145px; gap: 16px; }
 .pie-legend span { padding-bottom: 10px; border-bottom: 1px solid rgb(110 145 132 / 20%); }
@@ -74,7 +89,7 @@ nav { display: grid; gap: 8px; }
 @media (max-width: 560px) {
 	.salary-section { padding: 24px 19px; border-radius: 14px; }
 	.salary-pie { align-items: flex-start; flex-direction: column; }
-	.pie-chart { width: 210px; height: 210px; }
-	.pie-hole { width: 128px; height: 128px; }
+	.pie-chart { width: 240px; height: 240px; }
+	.pie-hole { width: 146px; height: 146px; }
 	.pie-legend { width: 100%; }
 }

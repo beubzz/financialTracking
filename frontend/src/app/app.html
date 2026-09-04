@@ -1,0 +1,33 @@
+<main class="app-shell">
+  <aside class="sidebar">
+    <div class="brand"><span class="brand-mark">$</span><span>Ledgerly</span></div>
+    <nav aria-label="Navigation principale">
+      <a class="nav-item active" routerLink="/dashboard"><span aria-hidden="true">◈</span>Vue d'ensemble</a>
+      <a class="nav-item" routerLink="/dashboard"><span aria-hidden="true">▤</span>Transactions</a>
+      <a class="nav-item" routerLink="/dashboard"><span aria-hidden="true">⌁</span>Objectifs</a>
+    </nav>
+    <div class="sidebar-footer"><span class="status-dot"></span>Synchronisation active</div>
+  </aside>
+
+  <section class="content-area">
+    <header class="topbar">
+      <div><p class="eyebrow">Vendredi 4 septembre 2026</p><h1>Bonjour, Thomas</h1></div>
+      <button class="profile-button" type="button" aria-label="Ouvrir le profil"><span>TB</span><strong>Thomas B.</strong><small>⌄</small></button>
+    </header>
+
+    <div class="content-inner">
+      <div class="month-row"><div><p class="eyebrow">Votre espace financier</p><h2>Septembre 2026</h2></div><button class="month-button" type="button">‹ <span>Mois précédent</span></button></div>
+
+      <section class="metric-grid" aria-label="Résumé du mois">
+        <article class="metric-card accent"><div class="metric-heading"><span>Solde disponible</span><span class="metric-icon">↗</span></div><strong>2 480,00 €</strong><p class="positive">+12,4% <span>vs. août</span></p></article>
+        <article class="metric-card"><div class="metric-heading"><span>Revenus</span><span class="metric-icon">↑</span></div><strong>3 250,00 €</strong><p>1 entrée ce mois</p></article>
+        <article class="metric-card"><div class="metric-heading"><span>Dépenses</span><span class="metric-icon expense">↓</span></div><strong>770,00 €</strong><p>24% des revenus</p></article>
+      </section>
+
+      <section class="main-grid">
+        <article class="panel chart-panel"><div class="panel-header"><div><p class="eyebrow">Évolution</p><h3>Flux de trésorerie</h3></div><span class="tag">7 derniers mois</span></div><div class="chart" aria-label="Graphique d'évolution des revenus et dépenses"><div class="chart-y"><span>4k</span><span>3k</span><span>2k</span><span>1k</span><span>0</span></div><div class="chart-body"><div class="grid-lines"></div><svg viewBox="0 0 680 260" preserveAspectRatio="none" role="img" aria-label="Revenus en vert et dépenses en bleu"><polyline class="income-line" points="0,132 110,110 220,142 330,80 440,98 550,58 680,72"/><polyline class="expense-line" points="0,198 110,188 220,205 330,175 440,184 550,165 680,178"/></svg><div class="chart-labels"><span>mars</span><span>avr.</span><span>mai</span><span>juin</span><span>juil.</span><span>août</span><span>sept.</span></div></div></div><div class="legend"><span><i class="income-dot"></i>Revenus</span><span><i class="expense-dot"></i>Dépenses</span></div></article>
+        <article class="panel activity-panel"><div class="panel-header"><div><p class="eyebrow">À venir</p><h3>Prochaines étapes</h3></div><button class="icon-button" type="button" aria-label="Ajouter une étape">+</button></div><div class="empty-state"><div class="empty-icon">✦</div><strong>Votre mois commence ici</strong><p>Ajoutez votre salaire et vos premières dépenses pour suivre votre équilibre en un coup d'œil.</p><button class="primary-button" type="button">+ Ajouter une dépense</button></div></article>
+      </section>
+    </div>
+  </section>
+</main>

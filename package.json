@@ -1,0 +1,19 @@
+{
+  "name": "financial-tracking",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "install:all": "npm install --prefix backend && npm install --prefix frontend",
+    "dev:backend": "npm run dev --prefix backend",
+    "dev:frontend": "npm start --prefix frontend",
+    "build:backend": "npm run build --prefix backend",
+    "build:frontend": "npm run build --prefix frontend",
+    "typecheck": "npm run typecheck --prefix backend"
+  },
+  "devDependencies": {
+    "prisma": "^6.19.3"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.19.3"
+  }
+}

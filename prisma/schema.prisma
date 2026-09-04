@@ -1,5 +1,6 @@
 generator client {
   provider = "prisma-client-js"
+  output   = "../backend/generated/prisma"
 }
 
 datasource db {
@@ -11,9 +12,12 @@ model User {
   id           String          @id @default(cuid())
   email        String          @unique
   passwordHash String
+  emailVerified DateTime?
   createdAt    DateTime        @default(now())
   updatedAt    DateTime        @updatedAt
   months       FinancialMonth[]
+  verificationTokens VerificationToken[]
+  passwordResetTokens PasswordResetToken[]
 }
 
 model FinancialMonth {
@@ -29,6 +33,28 @@ model FinancialMonth {
   @@index([userId, month])
 }
 
+model VerificationToken {
+  id        String   @id @default(cuid())
+  tokenHash String   @unique
+  userId    String
+  expiresAt DateTime
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@index([userId, expiresAt])
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  tokenHash String   @unique
+  userId    String
+  expiresAt DateTime
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@index([userId, expiresAt])
+}
+
 model MoneyEntry {
   id          String         @id @default(cuid())
   label       String
@@ -36,15 +62,29 @@ model MoneyEntry {
   type        EntryType
   category    String?
   isRecurring Boolean        @default(false)
+  recurrence  Recurrence     @default(MONTH)
+  section     EntrySection   @default(MANDATORY)
   monthId     String
   month       FinancialMonth @relation(fields: [monthId], references: [id], onDelete: Cascade)
   createdAt   DateTime       @default(now())
   updatedAt   DateTime       @updatedAt
 
   @@index([monthId, type])
+  @@unique([monthId, label])
 }
 
 enum EntryType {
   INCOME
   EXPENSE
+}
+
+enum Recurrence {
+  WEEK
+  MONTH
+  YEAR
+}
+
+enum EntrySection {
+  MANDATORY
+  PLEASURE
 }

@@ -4,7 +4,7 @@ Ledgerly est un outil personnel de suivi financier mensuel. Le projet est organi
 
 ## Etat actuel
 
-La première version fournit le socle du projet et un dashboard responsive sombre. Le modèle Prisma prépare les utilisateurs, les mois financiers et les entrées de revenus/dépenses. Le formulaire mensuel, le report des lignes et l'authentification complète seront ajoutés dans les prochaines étapes.
+La première version fournit un dashboard responsive sombre avec salaire, dépenses obligatoires, plaisir & projets, minimum à investir et camembert de répartition. Le bouton `+` ouvre un formulaire local pour ajouter une ligne avec libellé, prix et récurrence hebdomadaire, mensuelle ou annuelle. Les données sont encore locales au navigateur; la persistance API/Prisma et le report automatique d'un mois à l'autre viendront ensuite.
 
 ## Prerequis
 
@@ -21,6 +21,8 @@ Copy-Item backend/.env.example backend/.env
 ```
 
 Modifie ensuite `backend/.env` avec une vraie `DATABASE_URL` et un `JWT_SECRET` d'au moins 32 caractères.
+
+Pour activer les e-mails de vérification et de récupération de mot de passe, renseigne aussi `MAIL_FROM`, `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER` et `SMTP_PASSWORD`. Sans SMTP, le lien est écrit dans les logs de l'API pour le développement local; aucun e-mail n'est alors envoyé.
 
 ```powershell
 npm run build:backend

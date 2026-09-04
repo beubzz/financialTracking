@@ -1,3 +1,4 @@
+@if (loggedIn()) {
 <main class="app-shell">
   <aside class="sidebar">
     <div class="brand"><span class="brand-mark">$</span><span>Ledgerly</span></div>
@@ -12,22 +13,62 @@
   <section class="content-area">
     <header class="topbar">
       <div><p class="eyebrow">Vendredi 4 septembre 2026</p><h1>Bonjour, Thomas</h1></div>
-      <button class="profile-button" type="button" aria-label="Ouvrir le profil"><span>TB</span><strong>Thomas B.</strong><small>⌄</small></button>
+      <button class="profile-button" type="button" (click)="logout()" aria-label="Se déconnecter"><span>TB</span><strong>Se déconnecter</strong><small>↪</small></button>
     </header>
 
     <div class="content-inner">
       <div class="month-row"><div><p class="eyebrow">Votre espace financier</p><h2>Septembre 2026</h2></div><button class="month-button" type="button">‹ <span>Mois précédent</span></button></div>
 
-      <section class="metric-grid" aria-label="Résumé du mois">
-        <article class="metric-card accent"><div class="metric-heading"><span>Solde disponible</span><span class="metric-icon">↗</span></div><strong>2 480,00 €</strong><p class="positive">+12,4% <span>vs. août</span></p></article>
-        <article class="metric-card"><div class="metric-heading"><span>Revenus</span><span class="metric-icon">↑</span></div><strong>3 250,00 €</strong><p>1 entrée ce mois</p></article>
-        <article class="metric-card"><div class="metric-heading"><span>Dépenses</span><span class="metric-icon expense">↓</span></div><strong>770,00 €</strong><p>24% des revenus</p></article>
+      <section class="salary-section panel">
+        <div class="section-heading"><div><p class="eyebrow">01 / Revenu principal</p><h3>Salaire</h3><p class="section-copy">Votre point de départ pour construire un mois serein.</p></div><div class="salary-editor"><label for="salary-input">Montant net mensuel</label><div class="salary-input-wrap"><input id="salary-input" type="number" [value]="salary()" min="0" step="0.01" aria-label="Salaire net mensuel"><span>€</span></div><button class="save-button" type="button" (click)="saveSalary()">Enregistrer</button></div></div>
+        <div class="salary-summary"><strong>{{ formatAmount(salary()) }}</strong><span>revenu disponible ce mois</span><div class="salary-line"><i [style.width.%]="investRate()"></i></div><small>{{ investRate() }}% reste disponible après vos prévisions</small></div>
+        <div class="salary-pie"><div class="pie-chart" [style.background]="chartBackground()" role="img" aria-label="Camembert de répartition du salaire"><div class="pie-hole"><strong>{{ formatAmount(salary()) }}</strong><small>salaire total</small></div></div><div class="pie-legend"><span><i class="mandatory-dot"></i><b>Obligatoire</b><strong>{{ formatAmount(totalMandatory()) }}</strong></span><span><i class="pleasure-dot"></i><b>Plaisir</b><strong>{{ formatAmount(totalPleasure()) }}</strong></span><span><i class="invest-dot"></i><b>À investir</b><strong>{{ formatAmount(remaining()) }}</strong></span></div></div>
       </section>
 
-      <section class="main-grid">
-        <article class="panel chart-panel"><div class="panel-header"><div><p class="eyebrow">Évolution</p><h3>Flux de trésorerie</h3></div><span class="tag">7 derniers mois</span></div><div class="chart" aria-label="Graphique d'évolution des revenus et dépenses"><div class="chart-y"><span>4k</span><span>3k</span><span>2k</span><span>1k</span><span>0</span></div><div class="chart-body"><div class="grid-lines"></div><svg viewBox="0 0 680 260" preserveAspectRatio="none" role="img" aria-label="Revenus en vert et dépenses en bleu"><polyline class="income-line" points="0,132 110,110 220,142 330,80 440,98 550,58 680,72"/><polyline class="expense-line" points="0,198 110,188 220,205 330,175 440,184 550,165 680,178"/></svg><div class="chart-labels"><span>mars</span><span>avr.</span><span>mai</span><span>juin</span><span>juil.</span><span>août</span><span>sept.</span></div></div></div><div class="legend"><span><i class="income-dot"></i>Revenus</span><span><i class="expense-dot"></i>Dépenses</span></div></article>
-        <article class="panel activity-panel"><div class="panel-header"><div><p class="eyebrow">À venir</p><h3>Prochaines étapes</h3></div><button class="icon-button" type="button" aria-label="Ajouter une étape">+</button></div><div class="empty-state"><div class="empty-icon">✦</div><strong>Votre mois commence ici</strong><p>Ajoutez votre salaire et vos premières dépenses pour suivre votre équilibre en un coup d'œil.</p><button class="primary-button" type="button">+ Ajouter une dépense</button></div></article>
+      <section class="section-block">
+        <div class="section-title"><div><p class="eyebrow">02 / L'essentiel</p><h3>Dépenses obligatoires</h3><p>Les charges qui reviennent chaque mois, sans surprise.</p></div><button class="add-button" type="button" (click)="openExpenseForm('mandatory')" aria-label="Ajouter une dépense obligatoire">+</button></div>
+        <div class="entry-list" [class.empty-list]="!totalMandatory()">
+          @for (entry of entries(); track entry.id) {
+            @if (entry.section === 'mandatory') {
+              <article class="entry-row"><span class="entry-bullet mandatory-bullet"></span><div class="entry-name"><strong>{{ entry.label }}</strong><small>Récurrent chaque {{ recurrenceLabel(entry.recurrence) }}</small></div><strong class="entry-amount">- {{ formatAmount(entry.amount) }}</strong><button class="delete-button" type="button" (click)="removeExpense(entry.id)" [attr.aria-label]="'Supprimer ' + entry.label">×</button></article>
+            }
+          }
+          @if (!totalMandatory()) { <p class="list-empty">Aucune dépense obligatoire pour le moment.</p> }
+        </div>
+        <div class="section-total"><span>Total obligatoire</span><strong>{{ formatAmount(totalMandatory()) }}</strong></div>
+      </section>
+
+      <section class="section-block pleasure-block">
+        <div class="section-title"><div><p class="eyebrow">03 / Liberté</p><h3>Plaisir & projets</h3><p>Ce que vous choisissez de mettre de côté pour vous.</p></div><button class="add-button warm" type="button" (click)="openExpenseForm('pleasure')" aria-label="Ajouter une dépense plaisir">+</button></div>
+        <div class="entry-list" [class.empty-list]="!totalPleasure()">
+          @for (entry of entries(); track entry.id) {
+            @if (entry.section === 'pleasure') {
+              <article class="entry-row"><span class="entry-bullet pleasure-bullet"></span><div class="entry-name"><strong>{{ entry.label }}</strong><small>Récurrent chaque {{ recurrenceLabel(entry.recurrence) }}</small></div><strong class="entry-amount warm-text">- {{ formatAmount(entry.amount) }}</strong><button class="delete-button" type="button" (click)="removeExpense(entry.id)" [attr.aria-label]="'Supprimer ' + entry.label">×</button></article>
+            }
+          }
+          @if (!totalPleasure()) { <p class="list-empty">Ajoutez une envie ou un projet à financer.</p> }
+        </div>
+        <div class="section-total"><span>Total plaisir & projets</span><strong>{{ formatAmount(totalPleasure()) }}</strong></div>
+      </section>
+
+      <section class="bottom-grid">
+        <article class="panel invest-card"><div><p class="eyebrow">04 / Cap à long terme</p><h3>Minimum à investir</h3><p>La part de votre salaire préservée pour demain.</p></div><div class="invest-content"><div class="ring" [style.background]="'conic-gradient(#82dda9 0 ' + investRate() + '%, #293b36 ' + investRate() + '% 100%)'"><div><strong>{{ investRate() }}%</strong><small>du salaire</small></div></div><div><strong class="invest-amount">{{ formatAmount(remaining()) }}</strong><span>potentiel disponible</span></div></div></article>
       </section>
     </div>
   </section>
+
+  @if (showExpenseForm()) {
+    <div class="modal-backdrop" (click)="closeExpenseForm()">
+      <section class="expense-modal" role="dialog" aria-modal="true" aria-labelledby="expense-title" (click)="$event.stopPropagation()">
+        <div class="modal-header"><div><p class="eyebrow">Nouvelle ligne</p><h2 id="expense-title">{{ formSection === 'mandatory' ? 'Dépense obligatoire' : 'Plaisir ou projet' }}</h2></div><button class="close-button" type="button" (click)="closeExpenseForm()" aria-label="Fermer">×</button></div>
+        <label class="field-label" for="expense-label">Libellé</label><input class="text-input" id="expense-label" [(ngModel)]="formLabel" placeholder="Ex. Loyer, essence, cinéma..." autocomplete="off">
+        <label class="field-label" for="expense-amount">Prix</label><div class="amount-input"><input class="text-input" id="expense-amount" type="number" [(ngModel)]="formAmount" min="0.01" step="0.01" placeholder="0,00"><span>€</span></div>
+        <fieldset><legend class="field-label">Récurrence</legend><div class="radio-group"><label [class.selected]="formRecurrence === 'week'"><input type="radio" name="recurrence" value="week" [(ngModel)]="formRecurrence">Semaine</label><label [class.selected]="formRecurrence === 'month'"><input type="radio" name="recurrence" value="month" [(ngModel)]="formRecurrence">Mois</label><label [class.selected]="formRecurrence === 'year'"><input type="radio" name="recurrence" value="year" [(ngModel)]="formRecurrence">Année</label></div></fieldset>
+        <div class="modal-actions"><button class="cancel-button" type="button" (click)="closeExpenseForm()">Annuler</button><button class="primary-button" type="button" (click)="addExpense()">Ajouter la ligne</button></div>
+      </section>
+    </div>
+  }
 </main>
+} @else {
+<main class="auth-shell"><section class="auth-card"><div class="brand auth-brand"><span class="brand-mark">$</span><span>Ledgerly</span></div><p class="eyebrow">Votre espace financier</p><h1>{{ authMode() === 'login' ? 'Bon retour parmi nous' : (authMode() === 'register' ? 'Créer votre espace' : 'Réinitialiser votre mot de passe') }}</h1><p class="auth-subtitle">{{ authMode() === 'login' ? 'Retrouvez votre équilibre financier.' : (authMode() === 'register' ? 'Commencez à suivre vos finances sereinement.' : 'Recevez un lien sécurisé par e-mail.') }}</p><form (ngSubmit)="submitAuth()"><label class="field-label" for="auth-email">Adresse e-mail</label><input class="text-input" id="auth-email" name="email" type="email" [(ngModel)]="authEmail" required autocomplete="email" placeholder="vous@exemple.com">@if (authMode() !== 'forgot') {<label class="field-label" for="auth-password">Mot de passe</label><input class="text-input" id="auth-password" name="password" type="password" [(ngModel)]="authPassword" required minlength="8" autocomplete="current-password" placeholder="8 caractères minimum">}<p class="auth-error" role="alert">{{ authError }}</p><p class="auth-message">{{ authMessage }}</p><button class="primary-button auth-submit" type="submit" [disabled]="authBusy">{{ authBusy ? 'Chargement...' : (authMode() === 'login' ? 'Se connecter' : (authMode() === 'register' ? "S'inscrire" : 'Envoyer le lien')) }}</button></form>@if (authMode() === 'login') {<button class="auth-forgot" type="button" (click)="openForgotPassword()">Mot de passe oublié ?</button>}<button class="auth-switch" type="button" (click)="switchAuthMode()">{{ authMode() === 'register' ? 'J’ai déjà un compte' : 'Créer un compte' }}</button></section></main>
+}

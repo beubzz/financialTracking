@@ -2,11 +2,13 @@ import cors from 'cors';
 import express from 'express';
 import { env } from './config/env.js';
 import authRouter from './routes/auth.js';
+import financeRouter from './routes/finance.js';
 
 const app = express();
 app.use(cors({ origin: env.FRONTEND_URL }));
 app.use(express.json());
 app.use('/api/v1/auth', authRouter);
+app.use('/api/v1/finance', financeRouter);
 
 app.get('/health', (_request, response) => {
   response.json({ status: 'ok', service: 'financial-tracking-api' });

@@ -5,17 +5,20 @@ export const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
   {
     path: 'auth',
+    /** Lazily loads the authentication page when the route is requested. */
     loadComponent: () => import('./pages/auth/auth-page').then(({ AuthPage }) => AuthPage),
   },
   {
     path: 'dashboard',
     canActivate: [authGuard],
+    /** Lazily loads the dashboard page after authentication succeeds. */
     loadComponent: () =>
       import('./pages/dashboard/dashboard-page').then(({ DashboardPage }) => DashboardPage),
   },
   {
     path: 'transactions',
     canActivate: [authGuard],
+    /** Lazily loads the transactions page after authentication succeeds. */
     loadComponent: () =>
       import('./pages/transactions/transactions-page').then(
         ({ TransactionsPage }) => TransactionsPage,
@@ -24,6 +27,7 @@ export const routes: Routes = [
   {
     path: 'objectifs',
     canActivate: [authGuard],
+    /** Lazily loads the goals page after authentication succeeds. */
     loadComponent: () => import('./pages/goals/goals-page').then(({ GoalsPage }) => GoalsPage),
   },
   { path: '**', redirectTo: 'dashboard' },

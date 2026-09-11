@@ -11,6 +11,14 @@ const transporter =
       })
     : null;
 
+/**
+ * Sends an action link by SMTP or logs it when mail is not configured.
+ *
+ * @param to Recipient email address.
+ * @param subject Email subject.
+ * @param actionUrl URL the recipient must open.
+ * @param actionLabel Human-readable action displayed in the message.
+ */
 export async function sendActionEmail(
   to: string,
   subject: string,

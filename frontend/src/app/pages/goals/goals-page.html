@@ -1,74 +1,54 @@
-<main class="app-shell">
-  <aside class="sidebar">
-    <div class="brand"><span class="brand-mark">$</span><span>Ledgerly</span></div>
-    <nav aria-label="Navigation principale">
-      <a class="nav-item" routerLink="/dashboard"><span>◈</span>Vue d'ensemble</a
-      ><a class="nav-item" routerLink="/transactions"><span>▤</span>Transactions</a
-      ><a class="nav-item active" routerLink="/objectifs"><span>⌁</span>Objectifs</a>
-    </nav>
-  </aside>
-  <section class="content-area">
-    <header class="topbar">
-      <div>
-        <p class="eyebrow">Cap à long terme</p>
-        <h1>Objectifs d’épargne</h1>
-      </div>
-      <a class="month-button" routerLink="/dashboard">Retour au dashboard</a>
-    </header>
-    <div class="content-inner">
-      <section class="panel goal-form">
-        <p class="eyebrow">Nouvel objectif</p>
-        <div class="goal-fields">
-          <input
-            class="text-input"
-            [(ngModel)]="name"
-            placeholder="Ex. Fonds d'urgence"
-            aria-label="Nom de l'objectif"
-          /><input
-            class="text-input"
-            type="number"
-            [(ngModel)]="target"
-            placeholder="Montant cible"
-            aria-label="Montant cible"
-          /><input
-            class="text-input"
-            type="number"
-            [(ngModel)]="saved"
-            placeholder="Déjà épargné"
-            aria-label="Montant déjà épargné"
-          /><button class="primary-button" type="button" (click)="addGoal()">
-            Créer l’objectif
-          </button>
-        </div>
-      </section>
-      <div class="goal-grid">
-        @for (goal of goals(); track goal.id) {
-          <article class="panel goal-card">
-            <div class="goal-card-heading">
-              <div>
-                <p class="eyebrow">Objectif</p>
-                <h3>{{ goal.name }}</h3>
-              </div>
-              <button
-                class="delete-button"
-                type="button"
-                (click)="deleteGoal(goal.id)"
-                aria-label="Supprimer l’objectif"
-              >
-                ×
-              </button>
-            </div>
-            <strong class="goal-amount"
-              >{{ format(goal.saved) }} <small>/ {{ format(goal.target) }}</small></strong
-            >
-            <div class="goal-progress"><i [style.width.%]="progress(goal)"></i></div>
-            <span class="goal-percent">{{ progress(goal) }}% atteint</span>
-          </article>
-        }
-        @if (!goals().length) {
-          <p class="list-empty">Créez votre premier objectif d’épargne.</p>
-        }
-      </div>
+<app-layout eyebrow="Cap à long terme" title="Objectifs d’épargne">
+  <a class="month-button" layout-actions routerLink="/dashboard">Retour au dashboard</a>
+  <section class="panel goal-form">
+    <p class="eyebrow">Nouvel objectif</p>
+    <div class="goal-fields">
+      <input
+        class="text-input"
+        [(ngModel)]="name"
+        placeholder="Ex. Fonds d'urgence"
+        aria-label="Nom de l'objectif"
+      /><input
+        class="text-input"
+        type="number"
+        [(ngModel)]="target"
+        placeholder="Montant cible"
+        aria-label="Montant cible"
+      /><input
+        class="text-input"
+        type="number"
+        [(ngModel)]="saved"
+        placeholder="Déjà épargné"
+        aria-label="Montant déjà épargné"
+      /><button class="primary-button" type="button" (click)="addGoal()">Créer l’objectif</button>
     </div>
   </section>
-</main>
+  <div class="goal-grid">
+    @for (goal of goals(); track goal.id) {
+      <article class="panel goal-card">
+        <div class="goal-card-heading">
+          <div>
+            <p class="eyebrow">Objectif</p>
+            <h3>{{ goal.name }}</h3>
+          </div>
+          <button
+            class="delete-button"
+            type="button"
+            (click)="deleteGoal(goal.id)"
+            aria-label="Supprimer l’objectif"
+          >
+            ×
+          </button>
+        </div>
+        <strong class="goal-amount"
+          >{{ format(goal.saved) }} <small>/ {{ format(goal.target) }}</small></strong
+        >
+        <div class="goal-progress"><i [style.width.%]="progress(goal)"></i></div>
+        <span class="goal-percent">{{ progress(goal) }}% atteint</span>
+      </article>
+    }
+    @if (!goals().length) {
+      <p class="list-empty">Créez votre premier objectif d’épargne.</p>
+    }
+  </div>
+</app-layout>

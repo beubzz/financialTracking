@@ -4,6 +4,14 @@ import { env } from "../config/env.js";
 
 export type AuthenticatedRequest = Request & { userId?: string };
 
+/**
+ * Validates the bearer token and attaches its subject to the request.
+ *
+ * @param request The incoming Express request.
+ * @param response The Express response used for authentication errors.
+ * @param next The middleware callback invoked after successful validation.
+ * @returns The next middleware result or an HTTP 401 response.
+ */
 export function requireAuth(
   request: AuthenticatedRequest,
   response: Response,

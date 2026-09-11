@@ -1,41 +1,41 @@
 import { Router } from "express";
 import { z } from "zod";
-import { Prisma, type Prisma as PrismaTypes } from "../../generated/prisma/index.js";
+import {
+  Prisma,
+  type Prisma as PrismaTypes,
+} from "../../generated/prisma/index.js";
 import { prisma } from "../lib/prisma.js";
 import { requireAuth, type AuthenticatedRequest } from "../middleware/auth.js";
+import {
+  entrySchema,
+  entryUpdateSchema,
+  goalSchema,
+  importSelectionSchema,
+  salarySchema,
+  toPrismaRecurrence,
+  toPrismaSection,
+} from "../lib/finance-validation.js";
 
 const router = Router();
-const entrySchema = z.object({
-  label: z.string().trim().min(1).max(120),
-  amount: z.coerce.number().positive().max(100000000),
-  section: z.enum(["mandatory", "pleasure", "variable", "investment"]),
-  recurrence: z.enum(["unique", "week", "month", "year"]),
-  category: z.string().trim().max(60).optional(),
-  note: z.string().trim().max(500).optional(),
-  occurredAt: z.string().datetime().optional(),
-  parentId: z.string().trim().min(1).optional(),
-});
-const entryUpdateSchema = entrySchema
-  .partial()
-  .refine((value) => Object.keys(value).length > 0);
-const importSelectionSchema = z.object({
-  selectedIds: z.array(z.string()).default([]),
-});
-const goalSchema = z.object({
-  name: z.string().trim().min(1).max(120),
-  target: z.coerce.number().positive().max(100000000),
-  saved: z.coerce.number().min(0).max(100000000).default(0),
-  targetDate: z.string().datetime().optional(),
-});
-const salarySchema = z.object({
-  amount: z.coerce.number().positive().max(100000000),
-});
 
+/**
+ * Normalizes a YYYY-MM query value to the first UTC day of that month.
+ *
+ * @param value Optional month query value.
+ * @returns The normalized month start date.
+ */
 function monthStart(value: string | undefined) {
   const date = value ? new Date(`${value}-01T00:00:00.000Z`) : new Date();
   return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), 1));
 }
 
+/**
+ * Loads a user's month or creates it when it does not exist yet.
+ *
+ * @param userId The owner of the financial month.
+ * @param date The normalized month date.
+ * @returns The month and its entries ordered by creation time.
+ */
 async function getOrCreateMonth(userId: string, date: Date) {
   return prisma.financialMonth.upsert({
     where: { userId_month: { userId, month: date } },
@@ -88,22 +88,14 @@ router.post("/entries", async (request: AuthenticatedRequest, response) => {
     request.userId!,
     monthStart(request.query.month as string | undefined),
   );
-  const section =
-    parsed.data.section === "mandatory"
-      ? "MANDATORY"
-      : parsed.data.section === "pleasure"
-        ? "PLEASURE"
-        : parsed.data.section === "investment"
-          ? "INVESTMENT"
-          : "VARIABLE";
+  const section = toPrismaSection(parsed.data.section);
   const entryData: PrismaTypes.MoneyEntryUncheckedCreateInput = {
     monthId: month.id,
     label: parsed.data.label,
     amount: parsed.data.amount,
     type: "EXPENSE",
     section,
-    recurrence: parsed.data.recurrence.toUpperCase() as
-      "WEEK" | "MONTH" | "YEAR",
+    recurrence: toPrismaRecurrence(parsed.data.recurrence),
     isRecurring: parsed.data.recurrence !== "unique",
     category: parsed.data.category,
     note: parsed.data.note,
@@ -131,12 +123,24 @@ router.post("/entries", async (request: AuthenticatedRequest, response) => {
     const entry = await prisma.moneyEntry.create({ data: entryData });
     return response.status(201).json({ entry });
   } catch (error) {
-    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002")
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2002"
+    )
       return response.status(409).json({ error: "DUPLICATE_ENTRY_LABEL" });
     throw error;
   }
 });
 
+/**
+ * Finds source-month expenses that can be copied into a target month.
+ *
+ * @param userId The owner of both months.
+ * @param targetDate The month receiving imported entries.
+ * @param sourceDate The month providing candidate entries.
+ * @param importAll Whether all expenses should be considered.
+ * @returns The target month and entries absent from it.
+ */
 async function findImportCandidates(
   userId: string,
   targetDate: Date,
@@ -155,9 +159,7 @@ async function findImportCandidates(
   const candidates = source.entries.filter(
     (entry) =>
       entry.type === "EXPENSE" &&
-      (importAll ||
-        (entry.section === "MANDATORY" &&
-          entry.isRecurring)) &&
+      (importAll || (entry.section === "MANDATORY" && entry.isRecurring)) &&
       !existingLabels.has(entry.label),
   );
   return { target, candidates };
@@ -267,40 +269,46 @@ router.patch(
           NOT: { id: existing.id },
         },
       });
-      if (!parent || (section && parent.section !== (section === "variable" ? "VARIABLE" : section === "pleasure" ? "PLEASURE" : section === "mandatory" ? "MANDATORY" : "INVESTMENT")))
+      if (
+        !parent ||
+        (section &&
+          parent.section !==
+            (section === "variable"
+              ? "VARIABLE"
+              : section === "pleasure"
+                ? "PLEASURE"
+                : section === "mandatory"
+                  ? "MANDATORY"
+                  : "INVESTMENT"))
+      )
         return response.status(400).json({ error: "Invalid parent entry" });
     }
     try {
       const entry = await prisma.moneyEntry.update({
         where: { id: existing.id },
         data: {
-        ...rest,
-        ...(section
-          ? {
-              section:
-                section === "mandatory"
-                  ? "MANDATORY"
-                  : section === "pleasure"
-                    ? "PLEASURE"
-                    : section === "investment"
-                      ? "INVESTMENT"
-                      : "VARIABLE",
-            }
-          : {}),
-        ...(recurrence
-          ? {
-              recurrence: recurrence.toUpperCase() as
-                "UNIQUE" | "WEEK" | "MONTH" | "YEAR",
-              isRecurring: recurrence !== "unique",
-            }
-          : {}),
-        ...(occurredAt ? { occurredAt: new Date(occurredAt) } : {}),
-        ...(parentId !== undefined ? { parentId: parentId || null } : {}),
+          ...rest,
+          ...(section
+            ? {
+                section: toPrismaSection(section),
+              }
+            : {}),
+          ...(recurrence
+            ? {
+                recurrence: toPrismaRecurrence(recurrence),
+                isRecurring: recurrence !== "unique",
+              }
+            : {}),
+          ...(occurredAt ? { occurredAt: new Date(occurredAt) } : {}),
+          ...(parentId !== undefined ? { parentId: parentId || null } : {}),
         },
       });
       return response.json({ entry });
     } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002")
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === "P2002"
+      )
         return response.status(409).json({ error: "DUPLICATE_ENTRY_LABEL" });
       throw error;
     }

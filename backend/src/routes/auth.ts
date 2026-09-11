@@ -1,29 +1,17 @@
 import { Router } from "express";
 import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
 import { z } from "zod";
 import { env } from "../config/env.js";
 import { requireAuth, type AuthenticatedRequest } from "../middleware/auth.js";
 import { sendActionEmail } from "../lib/mail.js";
-import crypto from "node:crypto";
 import { prisma } from "../lib/prisma.js";
+import { rawToken, tokenFor, tokenHash } from "../lib/token.js";
 
 const router = Router();
 const credentials = z.object({
   email: z.string().email(),
   password: z.string().min(8),
 });
-
-function tokenFor(userId: string) {
-  return jwt.sign({}, env.JWT_SECRET, { subject: userId, expiresIn: "7d" });
-}
-
-function rawToken() {
-  return crypto.randomBytes(32).toString("hex");
-}
-function tokenHash(token: string) {
-  return crypto.createHash("sha256").update(token).digest("hex");
-}
 
 router.post("/register", async (request, response) => {
   const parsed = credentials.safeParse(request.body);
@@ -53,13 +41,11 @@ router.post("/register", async (request, response) => {
     `${env.FRONTEND_URL}/verify-email?token=${rawVerificationToken}`,
     "Vérifiez votre adresse e-mail Ledgerly",
   );
-  return response
-    .status(201)
-    .json({
-      token: tokenFor(user.id),
-      user: { id: user.id, email: user.email },
-      emailVerificationRequired: true,
-    });
+  return response.status(201).json({
+    token: tokenFor(user.id),
+    user: { id: user.id, email: user.email },
+    emailVerificationRequired: true,
+  });
 });
 
 router.post("/login", async (request, response) => {

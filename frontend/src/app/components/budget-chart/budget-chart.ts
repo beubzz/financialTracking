@@ -26,11 +26,16 @@ declare module 'chart.js' {
 
 Chart.register(ArcElement, DoughnutController, Legend, Tooltip);
 
+/**
+ * Positions doughnut tooltips on the chart edge instead of over the center label.
+ *
+ * @param items The chart elements associated with the active tooltip.
+ * @param eventPosition The pointer position used when no element is active.
+ * @returns The tooltip coordinates constrained to the chart area.
+ */
 Tooltip.positioners.avoidCenter = function (items, eventPosition) {
   const { left, right, top, bottom } = this.chart.chartArea;
-  const point = items[0]
-    ? (items[0].element as ArcElement).getCenterPoint(true)
-    : eventPosition;
+  const point = items[0] ? (items[0].element as ArcElement).getCenterPoint(true) : eventPosition;
   const centerX = (left + right) / 2;
   const pointX = point.x ?? centerX;
   const pointY = point.y ?? (top + bottom) / 2;
@@ -44,6 +49,7 @@ Tooltip.positioners.avoidCenter = function (items, eventPosition) {
   selector: 'app-budget-chart',
   imports: [DecimalPipe],
   templateUrl: './budget-chart.html',
+  styleUrl: './budget-chart.scss',
   host: { class: 'budget-chart' },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -59,27 +65,51 @@ export class BudgetChartComponent implements AfterViewInit, OnDestroy {
   private themeObserver?: MutationObserver;
   private viewReady = false;
 
+  /**
+   * Creates the reactive chart update effect.
+   *
+   * @returns Nothing; the chart effect is registered as a construction side effect.
+   */
   constructor() {
-    effect(() => {
-      const values = [
-        this.mandatory(),
-        this.variable(),
-        this.pleasure(),
-        this.investment(),
-        Math.max(this.remaining(), 0),
-      ];
-      if (this.viewReady) this.updateChart(values);
-    });
+    effect(
+      /**
+       * Rebuilds the chart data when one of the budget inputs changes.
+       *
+       * @returns Nothing; the chart is updated when the view is ready.
+       */
+      () => {
+        const values = [
+          this.mandatory(),
+          this.variable(),
+          this.pleasure(),
+          this.investment(),
+          Math.max(this.remaining(), 0),
+        ];
+        if (this.viewReady) this.updateChart(values);
+      },
+    );
   }
 
-  ngAfterViewInit() {
+  /**
+   * Initializes the theme observer and first chart render after the canvas exists.
+   *
+   * @returns Nothing; the chart and mutation observer are created as side effects.
+   */
+  ngAfterViewInit(): void {
     this.viewReady = true;
-    this.themeObserver = new MutationObserver(() => {
-      if (!this.chart) return;
-      this.chart.data.datasets[0].borderColor = this.chartBorderColors();
-      this.chart.data.datasets[0].borderWidth = this.chartBorderWidth();
-      this.chart.update('none');
-    });
+    this.themeObserver = new MutationObserver(
+      /**
+       * Refreshes chart borders after the document theme changes.
+       *
+       * @returns Nothing; the existing chart is updated in place.
+       */
+      () => {
+        if (!this.chart) return;
+        this.chart.data.datasets[0].borderColor = this.chartBorderColors();
+        this.chart.data.datasets[0].borderWidth = this.chartBorderWidth();
+        this.chart.update('none');
+      },
+    );
     this.themeObserver.observe(document.documentElement, {
       attributes: true,
       attributeFilter: ['data-theme'],
@@ -93,12 +123,23 @@ export class BudgetChartComponent implements AfterViewInit, OnDestroy {
     ]);
   }
 
-  ngOnDestroy() {
+  /**
+   * Releases the observer and Chart.js instance owned by this component.
+   *
+   * @returns Nothing; resources are disconnected and destroyed as side effects.
+   */
+  ngOnDestroy(): void {
     this.themeObserver?.disconnect();
     this.chart?.destroy();
   }
 
-  private updateChart(values: number[]) {
+  /**
+   * Creates or refreshes the doughnut chart with the supplied budget values.
+   *
+   * @param values Values for mandatory, variable, pleasure, investment and remaining amounts.
+   * @returns Nothing; the Chart.js instance is created or updated as a side effect.
+   */
+  private updateChart(values: number[]): void {
     const hasData = values.some((value) => value > 0);
     if (!this.chart) {
       this.chart = new Chart(this.canvas().nativeElement, {
@@ -130,8 +171,14 @@ export class BudgetChartComponent implements AfterViewInit, OnDestroy {
             legend: { display: false },
             tooltip: {
               position: 'avoidCenter',
-              xAlign: (context) =>
-                context.tooltip.caretX < context.chart.chartArea.width / 2 ? 'left' : 'right',
+              xAlign:
+                /**
+                 * Aligns the tooltip toward the side nearest the active arc.
+                 *
+                 * @param context The Chart.js tooltip context.
+                 * @returns The horizontal tooltip alignment.
+                 */ (context) =>
+                  context.tooltip.caretX < context.chart.chartArea.width / 2 ? 'left' : 'right',
               backgroundColor: '#172621',
               borderColor: '#8fe5bd',
               borderWidth: 1,
@@ -144,7 +191,13 @@ export class BudgetChartComponent implements AfterViewInit, OnDestroy {
               cornerRadius: 7,
               caretPadding: 8,
               callbacks: {
-                label: (context) => ` ${context.label}: ${this.formatAmount(Number(context.raw))}`,
+                label:
+                  /**
+                   * Formats a tooltip item with its label and euro amount.
+                   *
+                   * @param context The Chart.js tooltip item context.
+                   * @returns The formatted tooltip label.
+                   */ (context) => ` ${context.label}: ${this.formatAmount(Number(context.raw))}`,
               },
             },
           },
@@ -165,17 +218,33 @@ export class BudgetChartComponent implements AfterViewInit, OnDestroy {
     this.chart.update();
   }
 
-  private chartBorderColors() {
+  /**
+   * Returns border colors appropriate for the active document theme.
+   *
+   * @returns The five border colors used by the doughnut segments.
+   */
+  private chartBorderColors(): string[] {
     return document.documentElement.dataset['theme'] === 'light'
       ? ['#c6d2ff', '#a9edf5', '#f1b8ff', '#b8ffd1', '#e3edf9']
       : ['#12201d', '#12201d', '#12201d', '#12201d', '#12201d'];
   }
 
-  private chartBorderWidth() {
+  /**
+   * Returns the segment border width appropriate for the active theme.
+   *
+   * @returns The Chart.js border width in pixels.
+   */
+  private chartBorderWidth(): number {
     return document.documentElement.dataset['theme'] === 'light' ? 2 : 5;
   }
 
-  private formatAmount(amount: number) {
+  /**
+   * Formats a chart amount using the French euro currency format.
+   *
+   * @param amount The numeric amount to format.
+   * @returns The localized euro amount.
+   */
+  private formatAmount(amount: number): string {
     return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(amount);
   }
 }

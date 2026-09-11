@@ -12,6 +12,7 @@ interface ParentOption {
   selector: 'app-expense-form',
   imports: [FormsModule],
   templateUrl: './expense-form.html',
+  styleUrl: './expense-form.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ExpenseFormComponent {

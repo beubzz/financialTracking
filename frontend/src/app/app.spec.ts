@@ -3,6 +3,7 @@ import { provideRouter } from '@angular/router';
 import { App } from './app';
 
 describe('App', () => {
+  /** Creates the root component fixture before each test. */
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [App],
@@ -10,12 +11,14 @@ describe('App', () => {
     }).compileComponents();
   });
 
+  /** Verifies that the root component can be instantiated. */
   it('should create the app', () => {
     const fixture = TestBed.createComponent(App);
     const app = fixture.componentInstance;
     expect(app).toBeTruthy();
   });
 
+  /** Verifies that the root template exposes the router outlet. */
   it('should expose the router outlet', async () => {
     const fixture = TestBed.createComponent(App);
     await fixture.whenStable();

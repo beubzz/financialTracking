@@ -15,4 +15,5 @@ const envSchema = z.object({
   SMTP_PASSWORD: z.string().optional(),
 });
 
+/** Validated runtime configuration used by the API. */
 export const env = envSchema.parse(process.env);

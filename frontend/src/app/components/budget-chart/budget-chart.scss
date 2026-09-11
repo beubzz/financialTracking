@@ -1,0 +1,50 @@
+:host {
+  display: block;
+  flex: 0 0 256px;
+  width: 256px;
+  height: 256px;
+}
+
+.budget-chart-canvas {
+  position: relative;
+  z-index: 1;
+  width: 256px;
+  height: 256px;
+}
+
+.budget-chart-canvas canvas {
+  display: block;
+  width: 256px !important;
+  height: 256px !important;
+}
+
+.budget-chart-center {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  pointer-events: none;
+}
+
+.budget-chart-center strong {
+  color: #eef8f3;
+  font-family: 'DM Mono', monospace;
+  font-size: 17px;
+}
+
+.budget-chart-center small {
+  margin-top: 4px;
+  color: #78958a;
+  font-family: 'DM Mono', monospace;
+  font-size: 8px;
+  text-transform: uppercase;
+}
+
+[data-theme='light'] .budget-chart-center strong {
+  color: #21302c;
+}
+
+[data-theme='light'] .budget-chart-center small {
+  color: #6b8178;
+}

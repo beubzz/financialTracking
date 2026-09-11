@@ -38,82 +38,6 @@
   color: #ffffff;
   background: #48715d;
 }
-.auth-shell {
-  min-height: 100vh;
-  display: grid;
-  place-items: center;
-  padding: 24px;
-  background: radial-gradient(circle at 70% 15%, #17302a 0, transparent 34%), #0b0f10;
-}
-.auth-card {
-  width: min(100%, 410px);
-  padding: 38px;
-  border: 1px solid #2d423d;
-  border-radius: 10px;
-  background: #111919;
-  box-shadow: 0 24px 70px rgb(0 0 0 / 35%);
-}
-.auth-brand {
-  margin: 0 0 58px;
-}
-.auth-card h1 {
-  margin: 0;
-  color: #edf7f2;
-  font-size: 27px;
-  letter-spacing: -0.05em;
-}
-.auth-subtitle {
-  margin: 10px 0 30px;
-  color: #71837f;
-  font-size: 12px;
-  line-height: 1.6;
-}
-.auth-card form {
-  display: grid;
-}
-.auth-submit {
-  width: 100%;
-  padding: 12px;
-  margin-top: 4px;
-}
-.auth-submit:disabled {
-  opacity: 0.55;
-  cursor: wait;
-}
-.auth-switch {
-  width: 100%;
-  border: 0;
-  margin-top: 18px;
-  color: #8fe5bd;
-  background: transparent;
-  font-size: 11px;
-  cursor: pointer;
-}
-.auth-error {
-  min-height: 15px;
-  margin: -6px 0 8px;
-  color: #ef958b;
-  font-size: 10px;
-}
-.auth-message {
-  min-height: 15px;
-  margin: -6px 0 8px;
-  color: #8fe5bd;
-  font-size: 10px;
-}
-.auth-forgot {
-  width: 100%;
-  border: 0;
-  margin-top: 16px;
-  color: #82928f;
-  background: transparent;
-  font-size: 10px;
-  cursor: pointer;
-}
-.auth-forgot:hover {
-  color: #8fe5bd;
-}
-
 .app-shell {
   min-height: 100vh;
   display: flex;
@@ -945,9 +869,9 @@ h3 {
   --investment-color: #68dfa0;
   --investment-track: #293b36;
   border-color: #9affc1;
-    background: rgb(33 51 44 / 72%);
-    min-height: 300px;
-    border-radius: 15px;
+  background: rgb(33 51 44 / 72%);
+  min-height: 300px;
+  border-radius: 15px;
 }
 .invest-card-header {
   display: flex;
@@ -1080,129 +1004,6 @@ h3 {
 .invest-dot {
   background: #68dfa0;
 }
-.modal-backdrop {
-  position: fixed;
-  z-index: 10;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  padding: 20px;
-  background: rgb(4 8 8 / 75%);
-  backdrop-filter: blur(5px);
-}
-.expense-modal {
-  width: min(100%, 430px);
-  padding: 27px;
-  border: 1px solid #385148;
-  border-radius: 9px;
-  background: #111919;
-  box-shadow: 0 24px 80px rgb(0 0 0 / 40%);
-}
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 28px;
-}
-.modal-header h2 {
-  color: #e8f3ee;
-  font-size: 20px;
-  letter-spacing: -0.04em;
-}
-.close-button {
-  align-self: start;
-  border: 0;
-  color: #839590;
-  background: transparent;
-  font-size: 25px;
-  cursor: pointer;
-}
-.text-input {
-  width: 100%;
-  border: 1px solid #30403e;
-  border-radius: 5px;
-  outline: 0;
-  padding: 11px 12px;
-  margin-bottom: 18px;
-  color: #e8f3ee;
-  background: #0d1414;
-  font-size: 12px;
-}
-.text-input:focus {
-  border-color: #82dda9;
-}
-.amount-input {
-  position: relative;
-}
-.amount-input .text-input {
-  padding-right: 30px;
-}
-.amount-input span {
-  position: absolute;
-  right: 12px;
-  top: 11px;
-  color: #82dda9;
-  font-family: 'DM Mono', monospace;
-  font-size: 12px;
-}
-.subentry-context {
-  margin: -12px 0 22px;
-  color: #82928f;
-  font-size: 11px;
-}
-.subentry-context strong {
-  color: #c394d8;
-}
-.parent-select {
-  appearance: auto;
-  cursor: pointer;
-}
-fieldset {
-  border: 0;
-  padding: 0;
-  margin: 0;
-}
-.radio-group {
-  display: flex;
-  gap: 7px;
-  margin-bottom: 28px;
-}
-.radio-group label {
-  flex: 1;
-  border: 1px solid #30403e;
-  border-radius: 5px;
-  padding: 10px 7px;
-  color: #82928f;
-  font-size: 10px;
-  text-align: center;
-  cursor: pointer;
-}
-.radio-group label.selected {
-  border-color: #82dda9;
-  color: #bcebd2;
-  background: #193027;
-}
-.radio-group input {
-  position: absolute;
-  opacity: 0;
-}
-.modal-actions {
-  display: flex;
-  justify-content: end;
-  gap: 9px;
-}
-.modal-actions .primary-button {
-  padding: 10px 15px;
-}
-.modal-actions .primary-button:disabled {
-  cursor: wait;
-  opacity: 0.6;
-}
-.form-error {
-  margin: 16px 0 0;
-  color: #f39b9b;
-  font-size: 11px;
-  line-height: 1.5;
-}
 @media (max-width: 800px) {
   .sidebar {
     width: 64px;
@@ -1320,9 +1121,6 @@ fieldset {
   .ring > div {
     width: 80px;
     height: 80px;
-  }
-  .expense-modal {
-    padding: 22px 18px;
   }
 }
 
@@ -1533,43 +1331,6 @@ fieldset {
   height: 126px;
   background: #12201d;
   box-shadow: inset 0 0 0 1px #2c4c40;
-}
-.budget-chart {
-  display: block;
-  flex: 0 0 256px;
-  width: 256px;
-  height: 256px;
-}
-.budget-chart-canvas {
-  position: relative;
-  z-index: 1;
-  width: 256px;
-  height: 256px;
-}
-.budget-chart-canvas canvas {
-  display: block;
-  width: 256px !important;
-  height: 256px !important;
-}
-.budget-chart-center {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-content: center;
-  justify-items: center;
-  pointer-events: none;
-}
-.budget-chart-center strong {
-  color: #eef8f3;
-  font-family: 'DM Mono', monospace;
-  font-size: 17px;
-}
-.budget-chart-center small {
-  margin-top: 4px;
-  color: #78958a;
-  font-family: 'DM Mono', monospace;
-  font-size: 8px;
-  text-transform: uppercase;
 }
 .month-controls {
   display: flex;
@@ -1974,18 +1735,12 @@ fieldset {
   box-shadow: 0 0 0 4px #203a30;
 }
 
-[data-theme='light'] .auth-shell {
-  background: radial-gradient(circle at 70% 15%, #d9eee4 0, transparent 34%), #f4f7f5;
-}
-[data-theme='light'] .auth-card,
 [data-theme='light'] .panel,
-[data-theme='light'] .expense-modal,
 [data-theme='light'] .import-modal {
   border-color: #d5e2dc;
   background: #ffffff;
   box-shadow: 0 24px 70px rgb(38 67 56 / 10%);
 }
-[data-theme='light'] .auth-card h1,
 [data-theme='light'] .panel h3,
 [data-theme='light'] .salary-section h3,
 [data-theme='light'] .modal-header h2,
@@ -1993,7 +1748,6 @@ fieldset {
 [data-theme='light'] .month-row h2,
 [data-theme='light'] .ring strong,
 [data-theme='light'] .pie-hole strong,
-[data-theme='light'] .budget-chart-center strong,
 [data-theme='light'] .metric-card strong,
 [data-theme='light'] .summary-metric strong,
 [data-theme='light'] .entry-name strong,
@@ -2008,7 +1762,6 @@ fieldset {
 [data-theme='light'] .invest-card p,
 [data-theme='light'] .metric-card p,
 [data-theme='light'] .pie-hole small,
-[data-theme='light'] .budget-chart-center small,
 [data-theme='light'] .entry-name small,
 [data-theme='light'] .transaction-row small,
 [data-theme='light'] .goal-percent,
@@ -2210,11 +1963,6 @@ fieldset {
 [data-theme='light'] .goal-progress {
   background: #dbeae1;
 }
-[data-theme='light'] .modal-backdrop {
-  background: rgb(33 48 44 / 34%);
-}
-
-[data-theme='light'] button,
 [data-theme='light'] .month-button {
   background: transparent !important;
 }

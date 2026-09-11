@@ -1,5 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
 import { environment } from '../environments/environment';
 
 export interface ApiEntry {
@@ -28,18 +29,44 @@ export interface Goal {
 @Injectable({ providedIn: 'root' })
 export class FinanceService {
   private readonly http = inject(HttpClient);
-  getMonth(month?: string) {
-    return this.http.get<MonthResponse>(`${environment.apiUrl}/finance/month`, {
-      params: month ? { month } : {},
-    });
-  }
-  saveSalary(amount: number, month?: string) {
-    return this.http.patch<{ salary: string | number }>(
-      `${environment.apiUrl}/finance/salary`,
-      { amount },
-      { params: month ? { month } : {} },
+
+  /**
+   * Loads the authenticated user's financial month.
+   *
+   * @param month Optional YYYY-MM month to load.
+   * @returns A promise containing the month and its entries.
+   */
+  getMonth(month?: string): Promise<MonthResponse> {
+    return firstValueFrom(
+      this.http.get<MonthResponse>(`${environment.apiUrl}/finance/month`, {
+        params: month ? { month } : {},
+      }),
     );
   }
+  /**
+   * Saves the salary entry for a financial month.
+   *
+   * @param amount The positive monthly salary amount.
+   * @param month Optional YYYY-MM month to update.
+   * @returns A promise containing the persisted salary amount.
+   */
+  saveSalary(amount: number, month?: string): Promise<{ salary: string | number }> {
+    return firstValueFrom(
+      this.http.patch<{ salary: string | number }>(
+        `${environment.apiUrl}/finance/salary`,
+        { amount },
+        { params: month ? { month } : {} },
+      ),
+    );
+  }
+
+  /**
+   * Creates a financial entry in a month.
+   *
+   * @param entry The entry data to persist.
+   * @param month Optional YYYY-MM month receiving the entry.
+   * @returns A promise containing the created entry.
+   */
   addEntry(
     entry: {
       label: string;
@@ -51,11 +78,22 @@ export class FinanceService {
       parentId?: string;
     },
     month?: string,
-  ) {
-    return this.http.post<{ entry: ApiEntry }>(`${environment.apiUrl}/finance/entries`, entry, {
-      params: month ? { month } : {},
-    });
+  ): Promise<{ entry: ApiEntry }> {
+    return firstValueFrom(
+      this.http.post<{ entry: ApiEntry }>(`${environment.apiUrl}/finance/entries`, entry, {
+        params: month ? { month } : {},
+      }),
+    );
   }
+
+  /**
+   * Updates an existing financial entry.
+   *
+   * @param id The identifier of the entry to update.
+   * @param entry The partial entry data to persist.
+   * @param month Optional YYYY-MM month containing the entry.
+   * @returns A promise containing the updated entry.
+   */
   updateEntry(
     id: string,
     entry: Partial<{
@@ -68,47 +106,115 @@ export class FinanceService {
       parentId: string;
     }>,
     month?: string,
-  ) {
-    return this.http.patch<{ entry: ApiEntry }>(
-      `${environment.apiUrl}/finance/entries/${id}`,
-      entry,
-      { params: month ? { month } : {} },
+  ): Promise<{ entry: ApiEntry }> {
+    return firstValueFrom(
+      this.http.patch<{ entry: ApiEntry }>(`${environment.apiUrl}/finance/entries/${id}`, entry, {
+        params: month ? { month } : {},
+      }),
     );
   }
-  deleteEntry(id: string) {
-    return this.http.delete(`${environment.apiUrl}/finance/entries/${id}`);
+
+  /**
+   * Deletes a financial entry.
+   *
+   * @param id The entry identifier to delete.
+   * @returns A promise that resolves when deletion succeeds.
+   */
+  deleteEntry(id: string): Promise<unknown> {
+    return firstValueFrom(this.http.delete(`${environment.apiUrl}/finance/entries/${id}`));
   }
-  getImportCandidates(mode: 'recurring' | 'all', month?: string, sourceMonth?: string) {
-    return this.http.get<{ entries: ApiEntry[] }>(
-      `${environment.apiUrl}/finance/entries/import-candidates`,
-      { params: { mode, ...(month ? { month } : {}), ...(sourceMonth ? { sourceMonth } : {}) } },
+  /**
+   * Loads entries available for import from another month.
+   *
+   * @param mode Whether to load recurring entries or all expenses.
+   * @param month Optional target YYYY-MM month.
+   * @param sourceMonth Optional source YYYY-MM month.
+   * @returns A promise containing import candidates.
+   */
+  getImportCandidates(
+    mode: 'recurring' | 'all',
+    month?: string,
+    sourceMonth?: string,
+  ): Promise<{ entries: ApiEntry[] }> {
+    return firstValueFrom(
+      this.http.get<{ entries: ApiEntry[] }>(
+        `${environment.apiUrl}/finance/entries/import-candidates`,
+        { params: { mode, ...(month ? { month } : {}), ...(sourceMonth ? { sourceMonth } : {}) } },
+      ),
     );
   }
+
+  /**
+   * Imports selected entries into a target month.
+   *
+   * @param mode Whether the source candidates are recurring or all expenses.
+   * @param selectedIds The identifiers of entries to import.
+   * @param month Optional target YYYY-MM month.
+   * @param sourceMonth Optional source YYYY-MM month.
+   * @returns A promise containing the import count and refreshed month.
+   */
   importEntries(
     mode: 'recurring' | 'all',
     selectedIds: string[],
     month?: string,
     sourceMonth?: string,
-  ) {
-    return this.http.post<{ imported: number; month: { entries: ApiEntry[] } }>(
-      `${environment.apiUrl}/finance/entries/import-recurring`,
-      { selectedIds },
-      { params: { mode, ...(month ? { month } : {}), ...(sourceMonth ? { sourceMonth } : {}) } },
+  ): Promise<{ imported: number; month: { entries: ApiEntry[] } }> {
+    return firstValueFrom(
+      this.http.post<{ imported: number; month: { entries: ApiEntry[] } }>(
+        `${environment.apiUrl}/finance/entries/import-recurring`,
+        { selectedIds },
+        { params: { mode, ...(month ? { month } : {}), ...(sourceMonth ? { sourceMonth } : {}) } },
+      ),
     );
   }
-  getGoals() {
-    return this.http.get<{ goals: Goal[] }>(`${environment.apiUrl}/finance/goals`);
+  /**
+   * Loads all savings goals for the authenticated user.
+   *
+   * @returns A promise containing the user's goals.
+   */
+  getGoals(): Promise<{ goals: Goal[] }> {
+    return firstValueFrom(this.http.get<{ goals: Goal[] }>(`${environment.apiUrl}/finance/goals`));
   }
-  addGoal(goal: { name: string; target: number; saved?: number; targetDate?: string }) {
-    return this.http.post<{ goal: Goal }>(`${environment.apiUrl}/finance/goals`, goal);
+
+  /**
+   * Creates a savings goal.
+   *
+   * @param goal The goal data to persist.
+   * @returns A promise containing the created goal.
+   */
+  addGoal(goal: {
+    name: string;
+    target: number;
+    saved?: number;
+    targetDate?: string;
+  }): Promise<{ goal: Goal }> {
+    return firstValueFrom(
+      this.http.post<{ goal: Goal }>(`${environment.apiUrl}/finance/goals`, goal),
+    );
   }
+
+  /**
+   * Updates an existing savings goal.
+   *
+   * @param id The identifier of the goal to update.
+   * @param goal The partial goal data to persist.
+   * @returns A promise containing the updated goal.
+   */
   updateGoal(
     id: string,
     goal: Partial<{ name: string; target: number; saved: number; targetDate: string }>,
-  ) {
-    return this.http.patch<{ goal: Goal }>(`${environment.apiUrl}/finance/goals/${id}`, goal);
+  ): Promise<{ goal: Goal }> {
+    return firstValueFrom(
+      this.http.patch<{ goal: Goal }>(`${environment.apiUrl}/finance/goals/${id}`, goal),
+    );
   }
-  deleteGoal(id: string) {
-    return this.http.delete(`${environment.apiUrl}/finance/goals/${id}`);
+  /**
+   * Deletes a savings goal.
+   *
+   * @param id The goal identifier to delete.
+   * @returns A promise that resolves when deletion succeeds.
+   */
+  deleteGoal(id: string): Promise<unknown> {
+    return firstValueFrom(this.http.delete(`${environment.apiUrl}/finance/goals/${id}`));
   }
 }

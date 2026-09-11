@@ -25,6 +25,23 @@
         ×
       </button>
     </div>
+    @if (parentLabel()) {
+      <p class="subentry-context">Sous-secteur de <strong>{{ parentLabel() }}</strong></p>
+    }
+    @if ((section() === 'variable' || section() === 'pleasure') && parentOptions().length > 0) {
+      <label class="field-label" for="expense-parent">Ligne parente</label>
+      <select
+        class="text-input parent-select"
+        id="expense-parent"
+        [ngModel]="parentId() ?? ''"
+        (ngModelChange)="parentId.set($event || null)"
+      >
+        <option value="">Aucune, créer une ligne principale</option>
+        @for (parent of parentOptions(); track parent.id) {
+          <option [value]="parent.id">Sous-secteur de {{ parent.label }}</option>
+        }
+      </select>
+    }
     <label class="field-label" for="expense-label">Libellé</label
     ><input
       class="text-input"
@@ -50,7 +67,15 @@
     <fieldset>
       <legend class="field-label">Récurrence</legend>
       <div class="radio-group">
-        <label [class.selected]="recurrence() === 'week'"
+        <label [class.selected]="recurrence() === 'unique'"
+          ><input
+            type="radio"
+            name="recurrence"
+            value="unique"
+            [ngModel]="recurrence()"
+            (ngModelChange)="recurrence.set($event)"
+          />Unique</label
+        ><label [class.selected]="recurrence() === 'week'"
           ><input
             type="radio"
             name="recurrence"
@@ -79,9 +104,17 @@
     </fieldset>
     <div class="modal-actions">
       <button class="cancel-button" type="button" (click)="close.emit()">Annuler</button
-      ><button class="primary-button" type="button" (click)="submitForm.emit()">
+      ><button
+        class="primary-button"
+        type="button"
+        [disabled]="submitting()"
+        (click)="submitForm.emit()"
+      >
         {{ editing() ? 'Enregistrer' : 'Ajouter la ligne' }}
       </button>
     </div>
+    @if (error()) {
+      <p class="form-error" role="alert">{{ error() }}</p>
+    }
   </section>
 </div>

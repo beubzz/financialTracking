@@ -67,12 +67,16 @@ model MoneyEntry {
   isRecurring Boolean        @default(false)
   recurrence  Recurrence     @default(MONTH)
   section     EntrySection   @default(MANDATORY)
+  parentId    String?
+  parent      MoneyEntry?    @relation("EntrySubentries", fields: [parentId], references: [id], onDelete: Cascade)
+  subentries  MoneyEntry[]   @relation("EntrySubentries")
   monthId     String
   month       FinancialMonth @relation(fields: [monthId], references: [id], onDelete: Cascade)
   createdAt   DateTime       @default(now())
   updatedAt   DateTime       @updatedAt
 
   @@index([monthId, type])
+  @@index([parentId])
   @@unique([monthId, label])
 }
 
@@ -96,6 +100,7 @@ enum EntryType {
 }
 
 enum Recurrence {
+  UNIQUE
   WEEK
   MONTH
   YEAR

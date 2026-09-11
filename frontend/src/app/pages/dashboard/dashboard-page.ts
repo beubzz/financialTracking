@@ -5,16 +5,23 @@ import { FinanceService } from '../../finance.service';
 import { ExpenseFormComponent } from '../../components/expense-form/expense-form';
 import { ExpenseSectionComponent } from '../../components/expense-section/expense-section';
 import { BudgetChartComponent } from '../../components/budget-chart/budget-chart';
-import { LucideChevronLeft, LucideChevronRight, LucideUpload, LucideWallet } from '@lucide/angular';
+import {
+  LucideChevronDown,
+  LucideChevronLeft,
+  LucideChevronRight,
+  LucideUpload,
+  LucideWallet,
+} from '@lucide/angular';
 
 type ExpenseSection = 'mandatory' | 'pleasure' | 'variable' | 'investment';
-type Recurrence = 'week' | 'month' | 'year';
+type Recurrence = 'unique' | 'week' | 'month' | 'year';
 interface MoneyEntry {
   id: string;
   label: string;
   amount: number;
   recurrence: Recurrence;
   section: ExpenseSection;
+  parentId?: string | null;
 }
 interface ImportEntry {
   id: string;
@@ -32,6 +39,7 @@ interface ImportEntry {
     ExpenseFormComponent,
     ExpenseSectionComponent,
     BudgetChartComponent,
+    LucideChevronDown,
     LucideChevronLeft,
     LucideChevronRight,
     LucideUpload,
@@ -58,6 +66,22 @@ export class DashboardPage {
   protected readonly importMode = signal<'recurring' | 'all'>('recurring');
   protected readonly importCandidates = signal<ImportEntry[]>([]);
   protected readonly selectedImportIds = signal<string[]>([]);
+  protected readonly formParentId = signal<string | null>(null);
+  protected readonly formParentLabel = signal<string | null>(null);
+  protected readonly formError = signal('');
+  protected readonly formSubmitting = signal(false);
+  protected readonly longTermCollapsed = signal(false);
+  protected readonly parentOptions = computed(() =>
+    this.entries()
+      .filter(
+        (entry) =>
+          (this.formSection() === 'variable' || this.formSection() === 'pleasure') &&
+          entry.section === this.formSection() &&
+          !entry.parentId &&
+          entry.id !== this.editingEntryId(),
+      )
+      .map((entry) => ({ id: entry.id, label: entry.label })),
+  );
   protected readonly currentMonth = signal(new Date().toISOString().slice(0, 7));
   protected readonly totalMandatory = computed(() =>
     this.entries()
@@ -65,14 +89,10 @@ export class DashboardPage {
       .reduce((total, entry) => total + entry.amount, 0),
   );
   protected readonly totalPleasure = computed(() =>
-    this.entries()
-      .filter((entry) => entry.section === 'pleasure')
-      .reduce((total, entry) => total + entry.amount, 0),
+    this.sectionTotal('pleasure'),
   );
   protected readonly totalVariable = computed(() =>
-    this.entries()
-      .filter((entry) => entry.section === 'variable')
-      .reduce((total, entry) => total + entry.amount, 0),
+    this.sectionTotal('variable'),
   );
   protected readonly totalInvestment = computed(() =>
     this.entries()
@@ -103,6 +123,9 @@ export class DashboardPage {
   protected logout() {
     this.auth.logout();
     this.router.navigateByUrl('/auth');
+  }
+  protected toggleLongTerm() {
+    this.longTermCollapsed.update((value) => !value);
   }
   protected openImportModal(mode: 'recurring' | 'all') {
     this.importMode.set(mode);
@@ -174,6 +197,25 @@ export class DashboardPage {
   protected openExpenseForm(section: ExpenseSection) {
     this.editingEntryId.set(null);
     this.formSection.set(section);
+    this.formLabel.set('');
+    this.formAmount.set(null);
+    this.formRecurrence.set('month');
+    this.formParentId.set(null);
+    this.formParentLabel.set(null);
+    this.formError.set('');
+    this.formSubmitting.set(false);
+    this.showExpenseForm.set(true);
+  }
+  protected openSubentryForm(parent: MoneyEntry) {
+    this.editingEntryId.set(null);
+    this.formSection.set(parent.section);
+    this.formLabel.set('');
+    this.formAmount.set(null);
+    this.formRecurrence.set('month');
+    this.formParentId.set(parent.id);
+    this.formParentLabel.set(parent.label);
+    this.formError.set('');
+    this.formSubmitting.set(false);
     this.showExpenseForm.set(true);
   }
   protected editExpense(entry: MoneyEntry) {
@@ -182,6 +224,9 @@ export class DashboardPage {
     this.formLabel.set(entry.label);
     this.formAmount.set(entry.amount);
     this.formRecurrence.set(entry.recurrence);
+    this.formParentId.set(entry.parentId ?? null);
+    this.formParentLabel.set(entry.parentId ? this.entries().find((item) => item.id === entry.parentId)?.label ?? null : null);
+    this.formError.set('');
     this.showExpenseForm.set(true);
   }
   protected closeExpenseForm() {
@@ -190,6 +235,10 @@ export class DashboardPage {
     this.formLabel.set('');
     this.formAmount.set(null);
     this.formRecurrence.set('month');
+    this.formParentId.set(null);
+    this.formParentLabel.set(null);
+    this.formError.set('');
+    this.formSubmitting.set(false);
   }
   protected updateSalaryDraft(event: Event) {
     const value = Number((event.target as HTMLInputElement).value);
@@ -204,11 +253,15 @@ export class DashboardPage {
   }
   protected addExpense() {
     if (!this.formLabel().trim() || !this.formAmount() || this.formAmount()! <= 0) return;
+    if (this.formSubmitting()) return;
+    this.formError.set('');
+    this.formSubmitting.set(true);
     const draft = {
       label: this.formLabel().trim(),
       amount: this.formAmount()!,
       recurrence: this.formRecurrence(),
       section: this.formSection(),
+      ...(this.formParentId() ? { parentId: this.formParentId()! } : {}),
     };
     const request = this.editingEntryId()
       ? this.finance.updateEntry(this.editingEntryId()!, draft, this.currentMonth())
@@ -221,6 +274,7 @@ export class DashboardPage {
           amount: Number(entry.amount),
           recurrence: entry.recurrence.toLowerCase() as Recurrence,
           section: entry.section.toLowerCase() as ExpenseSection,
+          parentId: entry.parentId,
         };
         this.entries.update((entries) =>
           this.editingEntryId()
@@ -229,18 +283,36 @@ export class DashboardPage {
         );
         this.closeExpenseForm();
       },
+      error: (error: { status: number; error?: { error?: string } | string }) => {
+        this.formSubmitting.set(false);
+        this.formError.set(
+          error.status === 409 &&
+          ((typeof error.error === 'object' && error.error?.error === 'DUPLICATE_ENTRY_LABEL') ||
+            error.error === 'DUPLICATE_ENTRY_LABEL')
+            ? 'Une ligne avec ce titre existe déjà pour ce mois. Choisissez un autre titre.'
+            : 'Impossible d’enregistrer cette dépense. Vérifiez que le serveur API est démarré.',
+        );
+      },
     });
   }
   protected removeExpense(id: string) {
     this.finance.deleteEntry(id).subscribe({
-      next: () => this.entries.update((entries) => entries.filter((entry) => entry.id !== id)),
+      next: () =>
+        this.entries.update((entries) => entries.filter((entry) => entry.id !== id && entry.parentId !== id)),
     });
   }
   protected formatAmount(amount: number) {
     return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(amount);
   }
   protected recurrenceLabel(recurrence: Recurrence) {
-    return { week: 'semaine', month: 'mois', year: 'année' }[recurrence];
+    return { unique: 'unique', week: 'semaine', month: 'mois', year: 'année' }[recurrence];
+  }
+  private sectionTotal(section: ExpenseSection) {
+    const parents = this.entries().filter((entry) => entry.section === section && !entry.parentId);
+    return parents.reduce((total, entry) => {
+      const children = this.entries().filter((child) => child.parentId === entry.id);
+      return total + (children.length ? children.reduce((sum, child) => sum + child.amount, 0) : entry.amount);
+    }, 0);
   }
 
   private loadMonth() {
@@ -257,6 +329,7 @@ export class DashboardPage {
       recurrence: string;
       section: string;
       type: string;
+      parentId?: string | null;
     }>;
   }) {
     const salary = month.entries.find((entry) => entry.type === 'INCOME');
@@ -272,6 +345,7 @@ export class DashboardPage {
           amount: Number(entry.amount),
           recurrence: entry.recurrence.toLowerCase() as Recurrence,
           section: entry.section.toLowerCase() as ExpenseSection,
+          parentId: entry.parentId,
         })),
     );
   }

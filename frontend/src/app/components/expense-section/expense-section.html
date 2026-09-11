@@ -1,7 +1,9 @@
 <section
   class="section-block"
+  [class.mandatory-block]="section() === 'mandatory'"
   [class.pleasure-block]="section() === 'pleasure'"
   [class.variable-block]="section() === 'variable'"
+  [class.investment-block]="section() === 'investment'"
 >
   <div class="section-title">
     <div>
@@ -45,23 +47,51 @@
       </h3>
       <p>{{ description() }}</p>
     </div>
-    <button
-      class="add-button"
-      [class.mandatory]="section() === 'mandatory'"
-      [class.variable]="section() === 'variable'"
-      [class.pleasure]="section() === 'pleasure'"
-      [class.investment]="section() === 'investment'"
-      type="button"
-      (click)="add.emit()"
-      [attr.aria-label]="'Ajouter à ' + title()"
-    >
-      +
-    </button>
+    <div class="section-actions">
+      <button
+        class="add-button"
+        [class.mandatory]="section() === 'mandatory'"
+        [class.variable]="section() === 'variable'"
+        [class.pleasure]="section() === 'pleasure'"
+        [class.investment]="section() === 'investment'"
+        type="button"
+        (click)="add.emit()"
+        [attr.aria-label]="'Ajouter à ' + title()"
+      >
+        +
+      </button>
+      @if (isCollapsible()) {
+        <button
+          class="collapse-button"
+          [class.mandatory]="section() === 'mandatory'"
+          [class.variable]="section() === 'variable'"
+          [class.pleasure]="section() === 'pleasure'"
+          [class.investment]="section() === 'investment'"
+          type="button"
+          [attr.aria-expanded]="!collapsed()"
+          [attr.aria-controls]="'expense-section-' + section()"
+          [attr.aria-label]="(collapsed() ? 'Déplier ' : 'Replier ') + title()"
+          (click)="toggleCollapsed()"
+        >
+          @if (collapsed()) {
+            <span class="collapsed-total">{{ formatAmount(total()) }}</span>
+            <svg lucideChevronRight aria-hidden="true" size="16"></svg>
+          } @else {
+            <svg lucideChevronDown aria-hidden="true" size="16"></svg>
+          }
+        </button>
+      }
+    </div>
   </div>
-  <div class="entry-list" [class.empty-list]="!total()">
-    @for (entry of entries(); track entry.id) {
-      @if (entry.section === section()) {
-        <article class="entry-row">
+  <div
+    class="section-content"
+    [id]="'expense-section-' + section()"
+    [hidden]="collapsed()"
+  >
+    <div class="entry-list" [class.empty-list]="!total()">
+    @for (entry of topLevelEntries(); track entry.id) {
+      <div class="entry-group" [class.has-subentries]="subentries(entry.id).length > 0">
+        <article class="entry-row parent-entry-row">
           <span
             class="entry-bullet"
             [class.mandatory-bullet]="section() === 'mandatory'"
@@ -71,16 +101,40 @@
           ></span>
           <div class="entry-name">
             <strong>{{ entry.label }}</strong
-            ><small>Récurrent chaque {{ recurrenceLabel(entry.recurrence) }}</small>
+            ><small>{{ entry.recurrence === 'unique' ? 'Unique' : 'Récurrent chaque ' + recurrenceLabel(entry.recurrence) }}</small>
           </div>
-          <strong
-            class="entry-amount"
-            [class.mandatory-text]="section() === 'mandatory'"
-            [class.variable-text]="section() === 'variable'"
-            [class.pleasure-text]="section() === 'pleasure'"
-            [class.investment-text]="section() === 'investment'"
-            >- <span class="entry-amount-value">{{ formatAmount(entry.amount) }}</span></strong
-          ><button
+          <div class="entry-amounts">
+            <strong
+              class="entry-amount entry-amount-item"
+              [class.mandatory-text]="section() === 'mandatory'"
+              [class.variable-text]="section() === 'variable'"
+              [class.pleasure-text]="section() === 'pleasure'"
+              [class.investment-text]="section() === 'investment'"
+              ><span class="entry-amount-line"><span class="entry-amount-prefix">-</span
+                ><span class="entry-amount-value">{{ formatAmount(entry.amount) }}</span></span
+              >@if (section() === 'variable' || section() === 'pleasure') {
+                <small>prévision</small>
+              }</strong
+            >
+            @if (hasSubentries(entry.id)) {
+              <strong
+                class="entry-amount entry-amount-item actual-amount"
+                [class.mandatory-text]="section() === 'mandatory'"
+                [class.variable-text]="section() === 'variable'"
+                [class.pleasure-text]="section() === 'pleasure'"
+                [class.investment-text]="section() === 'investment'"
+                ><span class="entry-amount-line"><span class="entry-amount-prefix">-</span
+                  ><span class="entry-amount-value">{{ formatAmount(childrenTotal(entry.id)) }}</span></span
+                ><small>réel</small></strong
+              >
+            }
+          </div>@if (section() === 'variable' || section() === 'pleasure') {
+            <button class="subentry-button" type="button" (click)="addSubentry.emit(entry)" [attr.aria-label]="'Ajouter un sous-secteur à ' + entry.label">+</button>
+          }
+          @if (subentries(entry.id).length > 0) {
+            <span class="subentry-count">{{ subentries(entry.id).length }} sous-secteur{{ subentries(entry.id).length > 1 ? 's' : '' }}</span>
+          }
+          <button
             class="edit-button"
             type="button"
             (click)="edit.emit(entry)"
@@ -96,7 +150,26 @@
             ×
           </button>
         </article>
-      }
+        @if (subentries(entry.id).length > 0) {
+          <div class="subentry-list">
+            <div class="subentry-heading">Sous-secteurs de {{ entry.label }}</div>
+            @for (child of subentries(entry.id); track child.id) {
+              <article class="entry-row subentry-row">
+                <span class="subentry-branch" aria-hidden="true"></span>
+            <div class="entry-name">
+              <strong>{{ child.label }}</strong
+              ><small>{{ child.recurrence === 'unique' ? 'Unique' : 'Récurrent chaque ' + recurrenceLabel(child.recurrence) }}</small>
+            </div>
+            <strong class="entry-amount" [class.variable-text]="section() === 'variable'" [class.pleasure-text]="section() === 'pleasure'"
+              ><span class="entry-amount-line"><span class="entry-amount-prefix">-</span
+                ><span class="entry-amount-value">{{ formatAmount(child.amount) }}</span></span></strong
+            ><button class="edit-button" type="button" (click)="edit.emit(child)" [attr.aria-label]="'Modifier ' + child.label">✎</button
+            ><button class="delete-button" type="button" (click)="remove.emit(child.id)" [attr.aria-label]="'Supprimer ' + child.label">×</button>
+              </article>
+            }
+          </div>
+        }
+      </div>
     }
     @if (!total()) {
       <p class="list-empty">
@@ -111,9 +184,10 @@
         }}
       </p>
     }
-  </div>
-  <div class="section-total">
-    <span>{{ title() }}</span
-    ><strong>{{ formatAmount(total()) }}</strong>
+    </div>
+    <div class="section-total">
+      <span>{{ title() }}</span
+      ><strong>{{ formatAmount(total()) }}</strong>
+    </div>
   </div>
 </section>

@@ -1,1 +1,15 @@
+<button
+	class="theme-toggle"
+	type="button"
+	(click)="toggleTheme()"
+	[attr.aria-label]="isDark() ? 'Activer le thème clair' : 'Activer le thème sombre'"
+	[attr.title]="isDark() ? 'Thème clair' : 'Thème sombre'"
+>
+	@if (isDark()) {
+		<svg lucideSun aria-hidden="true" size="16"></svg>
+	} @else {
+		<svg lucideMoon aria-hidden="true" size="16"></svg>
+	}
+</button>
+<router-outlet />
 <router-outlet />

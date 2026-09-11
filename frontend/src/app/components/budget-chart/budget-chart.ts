@@ -9,9 +9,36 @@ import {
   viewChild,
 } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
-import { ArcElement, Chart, DoughnutController, Legend, Tooltip } from 'chart.js';
+import {
+  ArcElement,
+  Chart,
+  DoughnutController,
+  Legend,
+  Tooltip,
+  type TooltipPositionerFunction,
+} from 'chart.js';
+
+declare module 'chart.js' {
+  interface TooltipPositionerMap {
+    avoidCenter: TooltipPositionerFunction<'doughnut'>;
+  }
+}
 
 Chart.register(ArcElement, DoughnutController, Legend, Tooltip);
+
+Tooltip.positioners.avoidCenter = function (items, eventPosition) {
+  const { left, right, top, bottom } = this.chart.chartArea;
+  const point = items[0]
+    ? (items[0].element as ArcElement).getCenterPoint(true)
+    : eventPosition;
+  const centerX = (left + right) / 2;
+  const pointX = point.x ?? centerX;
+  const pointY = point.y ?? (top + bottom) / 2;
+  const isLeft = pointX < centerX;
+  const y = Math.min(Math.max(pointY, top + 35), bottom - 35);
+
+  return { x: isLeft ? left + 10 : right - 10, y };
+};
 
 @Component({
   selector: 'app-budget-chart',
@@ -29,6 +56,7 @@ export class BudgetChartComponent implements AfterViewInit, OnDestroy {
   readonly remaining = input.required<number>();
   private readonly canvas = viewChild.required<ElementRef<HTMLCanvasElement>>('canvas');
   private chart?: Chart<'doughnut'>;
+  private themeObserver?: MutationObserver;
   private viewReady = false;
 
   constructor() {
@@ -46,6 +74,16 @@ export class BudgetChartComponent implements AfterViewInit, OnDestroy {
 
   ngAfterViewInit() {
     this.viewReady = true;
+    this.themeObserver = new MutationObserver(() => {
+      if (!this.chart) return;
+      this.chart.data.datasets[0].borderColor = this.chartBorderColors();
+      this.chart.data.datasets[0].borderWidth = this.chartBorderWidth();
+      this.chart.update('none');
+    });
+    this.themeObserver.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['data-theme'],
+    });
     this.updateChart([
       this.mandatory(),
       this.variable(),
@@ -56,6 +94,7 @@ export class BudgetChartComponent implements AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy() {
+    this.themeObserver?.disconnect();
     this.chart?.destroy();
   }
 
@@ -70,14 +109,14 @@ export class BudgetChartComponent implements AfterViewInit, OnDestroy {
             {
               data: hasData ? values : [0, 0, 0, 0, 1],
               backgroundColor: [
-                '#70bdd2',
-                '#839b91',
+                '#8fa8e8',
+                '#79b8c8',
                 '#c394d8',
-                '#82dda9',
-                hasData ? '#b8cbc4' : '#29413a',
+                '#68dfa0',
+                hasData ? '#b6c5d6' : '#29413a',
               ],
-              borderColor: '#12201d',
-              borderWidth: 5,
+              borderColor: this.chartBorderColors(),
+              borderWidth: this.chartBorderWidth(),
               hoverOffset: 8,
             },
           ],
@@ -90,6 +129,20 @@ export class BudgetChartComponent implements AfterViewInit, OnDestroy {
           plugins: {
             legend: { display: false },
             tooltip: {
+              position: 'avoidCenter',
+              xAlign: (context) =>
+                context.tooltip.caretX < context.chart.chartArea.width / 2 ? 'left' : 'right',
+              backgroundColor: '#172621',
+              borderColor: '#8fe5bd',
+              borderWidth: 1,
+              bodyColor: '#e9f0ee',
+              bodyFont: { family: 'Manrope', size: 11, weight: 600 },
+              displayColors: true,
+              padding: 11,
+              titleColor: '#ffffff',
+              titleFont: { family: 'Manrope', size: 11, weight: 700 },
+              cornerRadius: 7,
+              caretPadding: 8,
               callbacks: {
                 label: (context) => ` ${context.label}: ${this.formatAmount(Number(context.raw))}`,
               },
@@ -101,13 +154,25 @@ export class BudgetChartComponent implements AfterViewInit, OnDestroy {
     }
     this.chart.data.datasets[0].data = hasData ? values : [0, 0, 0, 0, 1];
     this.chart.data.datasets[0].backgroundColor = [
-      '#70bdd2',
-      '#839b91',
+      '#8fa8e8',
+      '#79b8c8',
       '#c394d8',
-      '#82dda9',
-      hasData ? '#b8cbc4' : '#29413a',
+      '#68dfa0',
+      hasData ? '#b6c5d6' : '#29413a',
     ];
+    this.chart.data.datasets[0].borderColor = this.chartBorderColors();
+    this.chart.data.datasets[0].borderWidth = this.chartBorderWidth();
     this.chart.update();
+  }
+
+  private chartBorderColors() {
+    return document.documentElement.dataset['theme'] === 'light'
+      ? ['#c6d2ff', '#a9edf5', '#f1b8ff', '#b8ffd1', '#e3edf9']
+      : ['#12201d', '#12201d', '#12201d', '#12201d', '#12201d'];
+  }
+
+  private chartBorderWidth() {
+    return document.documentElement.dataset['theme'] === 'light' ? 2 : 5;
   }
 
   private formatAmount(amount: number) {

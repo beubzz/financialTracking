@@ -6,12 +6,13 @@ export interface ApiEntry {
   id: string;
   label: string;
   amount: string | number;
-  recurrence: 'WEEK' | 'MONTH' | 'YEAR';
+  recurrence: 'UNIQUE' | 'WEEK' | 'MONTH' | 'YEAR';
   section: 'MANDATORY' | 'PLEASURE' | 'VARIABLE' | 'INVESTMENT';
   type: 'INCOME' | 'EXPENSE';
   category?: string | null;
   note?: string | null;
   occurredAt?: string | null;
+  parentId?: string | null;
 }
 export interface MonthResponse {
   month: { entries: ApiEntry[] };
@@ -44,9 +45,10 @@ export class FinanceService {
       label: string;
       amount: number;
       section: 'mandatory' | 'pleasure' | 'variable' | 'investment';
-      recurrence: 'week' | 'month' | 'year';
+      recurrence: 'unique' | 'week' | 'month' | 'year';
       category?: string;
       note?: string;
+      parentId?: string;
     },
     month?: string,
   ) {
@@ -60,9 +62,10 @@ export class FinanceService {
       label: string;
       amount: number;
       section: 'mandatory' | 'pleasure' | 'variable' | 'investment';
-      recurrence: 'week' | 'month' | 'year';
+      recurrence: 'unique' | 'week' | 'month' | 'year';
       category: string;
       note: string;
+      parentId: string;
     }>,
     month?: string,
   ) {

@@ -146,6 +146,7 @@
         [total]="totalVariable()"
         (add)="openExpenseForm('variable')"
         (edit)="editExpense($event)"
+        (addSubentry)="openSubentryForm($event)"
         (remove)="removeExpense($event)"
       />
       <app-expense-section
@@ -157,6 +158,7 @@
         [total]="totalPleasure()"
         (add)="openExpenseForm('pleasure')"
         (edit)="editExpense($event)"
+        (addSubentry)="openSubentryForm($event)"
         (remove)="removeExpense($event)"
       />
       <app-expense-section
@@ -177,13 +179,31 @@
         (remove)="removeExpense($event)"
       />
       <section class="bottom-grid">
-        <article class="panel invest-card">
-          <div>
-            <p class="eyebrow">06 / Cap à long terme</p>
-            <h3>Minimum à investir</h3>
-            <p>La part de votre salaire préservée pour demain.</p>
+        <article class="panel invest-card" [class.collapsed-card]="longTermCollapsed()">
+          <div class="invest-card-header">
+            <div>
+              <p class="eyebrow">06 / Cap à long terme</p>
+              <h3>Minimum à investir</h3>
+              <p>La part de votre salaire préservée pour demain.</p>
+            </div>
+            <button
+              class="collapse-button investment"
+              type="button"
+              [attr.aria-expanded]="!longTermCollapsed()"
+              aria-controls="long-term-content"
+              [attr.aria-label]="(longTermCollapsed() ? 'Déplier ' : 'Replier ') + 'Cap à long terme'"
+              (click)="toggleLongTerm()"
+            >
+              @if (longTermCollapsed()) {
+                <span class="collapsed-total">{{ formatAmount(remaining()) }}</span>
+                <svg lucideChevronRight aria-hidden="true" size="16"></svg>
+              } @else {
+                <svg lucideChevronDown aria-hidden="true" size="16"></svg>
+              }
+            </button>
           </div>
-          <div class="invest-content">
+          <div id="long-term-content" class="invest-card-content" [hidden]="longTermCollapsed()">
+            <div class="invest-content">
             <div
               class="ring"
               [style.background]="
@@ -203,6 +223,7 @@
                 formatAmount(remaining())
               }}</strong
               ><span>{{ remaining() < 0 ? 'dépassement prévu' : 'potentiel disponible' }}</span>
+            </div>
             </div>
           </div>
         </article>
@@ -281,9 +302,14 @@
     <app-expense-form
       [section]="formSection()"
       [editing]="!!editingEntryId()"
+      [error]="formError()"
+      [submitting]="formSubmitting()"
       [(label)]="formLabel"
       [(amount)]="formAmount"
       [(recurrence)]="formRecurrence"
+      [parentLabel]="formParentLabel()"
+      [parentOptions]="parentOptions()"
+      [(parentId)]="formParentId"
       (close)="closeExpenseForm()"
       (submitForm)="addExpense()"
     />

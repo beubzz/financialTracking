@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { z } from "zod";
-import type { Prisma } from "../../generated/prisma/index.js";
+import { Prisma, type Prisma as PrismaTypes } from "../../generated/prisma/index.js";
 import { prisma } from "../lib/prisma.js";
 import { requireAuth, type AuthenticatedRequest } from "../middleware/auth.js";
 
@@ -9,10 +9,11 @@ const entrySchema = z.object({
   label: z.string().trim().min(1).max(120),
   amount: z.coerce.number().positive().max(100000000),
   section: z.enum(["mandatory", "pleasure", "variable", "investment"]),
-  recurrence: z.enum(["week", "month", "year"]),
+  recurrence: z.enum(["unique", "week", "month", "year"]),
   category: z.string().trim().max(60).optional(),
   note: z.string().trim().max(500).optional(),
   occurredAt: z.string().datetime().optional(),
+  parentId: z.string().trim().min(1).optional(),
 });
 const entryUpdateSchema = entrySchema
   .partial()
@@ -95,7 +96,7 @@ router.post("/entries", async (request: AuthenticatedRequest, response) => {
         : parsed.data.section === "investment"
           ? "INVESTMENT"
           : "VARIABLE";
-  const entryData: Prisma.MoneyEntryUncheckedCreateInput = {
+  const entryData: PrismaTypes.MoneyEntryUncheckedCreateInput = {
     monthId: month.id,
     label: parsed.data.label,
     amount: parsed.data.amount,
@@ -103,15 +104,37 @@ router.post("/entries", async (request: AuthenticatedRequest, response) => {
     section,
     recurrence: parsed.data.recurrence.toUpperCase() as
       "WEEK" | "MONTH" | "YEAR",
-    isRecurring: true,
+    isRecurring: parsed.data.recurrence !== "unique",
     category: parsed.data.category,
     note: parsed.data.note,
     occurredAt: parsed.data.occurredAt
       ? new Date(parsed.data.occurredAt)
       : undefined,
+    parentId: parsed.data.parentId,
   };
-  const entry = await prisma.moneyEntry.create({ data: entryData });
-  return response.status(201).json({ entry });
+  if (parsed.data.parentId) {
+    const parent = await prisma.moneyEntry.findFirst({
+      where: {
+        id: parsed.data.parentId,
+        monthId: month.id,
+        type: "EXPENSE",
+        section: { in: ["VARIABLE", "PLEASURE"] },
+        parentId: null,
+      },
+    });
+    if (!parent)
+      return response.status(400).json({ error: "Invalid parent entry" });
+    if (parent.section !== section)
+      return response.status(400).json({ error: "Parent section mismatch" });
+  }
+  try {
+    const entry = await prisma.moneyEntry.create({ data: entryData });
+    return response.status(201).json({ entry });
+  } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002")
+      return response.status(409).json({ error: "DUPLICATE_ENTRY_LABEL" });
+    throw error;
+  }
 });
 
 async function findImportCandidates(
@@ -134,7 +157,7 @@ async function findImportCandidates(
       entry.type === "EXPENSE" &&
       (importAll ||
         (entry.section === "MANDATORY" &&
-          (entry.isRecurring || entry.recurrence))) &&
+          entry.isRecurring)) &&
       !existingLabels.has(entry.label),
   );
   return { target, candidates };
@@ -202,6 +225,7 @@ router.post(
           isRecurring: entry.isRecurring,
           category: entry.category,
           note: entry.note,
+          parentId: entry.parentId,
         })),
       });
     const month = await prisma.financialMonth.findUniqueOrThrow({
@@ -231,10 +255,25 @@ router.patch(
     });
     if (!existing)
       return response.status(404).json({ error: "Entry not found" });
-    const { section, recurrence, occurredAt, ...rest } = parsed.data;
-    const entry = await prisma.moneyEntry.update({
-      where: { id: existing.id },
-      data: {
+    const { section, recurrence, occurredAt, parentId, ...rest } = parsed.data;
+    if (parentId !== undefined && parentId) {
+      const parent = await prisma.moneyEntry.findFirst({
+        where: {
+          id: parentId,
+          monthId: existing.monthId,
+          type: "EXPENSE",
+          section: { in: ["VARIABLE", "PLEASURE"] },
+          parentId: null,
+          NOT: { id: existing.id },
+        },
+      });
+      if (!parent || (section && parent.section !== (section === "variable" ? "VARIABLE" : section === "pleasure" ? "PLEASURE" : section === "mandatory" ? "MANDATORY" : "INVESTMENT")))
+        return response.status(400).json({ error: "Invalid parent entry" });
+    }
+    try {
+      const entry = await prisma.moneyEntry.update({
+        where: { id: existing.id },
+        data: {
         ...rest,
         ...(section
           ? {
@@ -250,13 +289,21 @@ router.patch(
           : {}),
         ...(recurrence
           ? {
-              recurrence: recurrence.toUpperCase() as "WEEK" | "MONTH" | "YEAR",
+              recurrence: recurrence.toUpperCase() as
+                "UNIQUE" | "WEEK" | "MONTH" | "YEAR",
+              isRecurring: recurrence !== "unique",
             }
           : {}),
         ...(occurredAt ? { occurredAt: new Date(occurredAt) } : {}),
-      },
-    });
-    return response.json({ entry });
+        ...(parentId !== undefined ? { parentId: parentId || null } : {}),
+        },
+      });
+      return response.json({ entry });
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002")
+        return response.status(409).json({ error: "DUPLICATE_ENTRY_LABEL" });
+      throw error;
+    }
   },
 );
 

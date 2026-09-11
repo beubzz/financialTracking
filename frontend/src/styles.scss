@@ -1,6 +1,8 @@
 @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap');
 
 :root { font-family: 'Manrope', sans-serif; color: #e9f0ee; background: #0b0f10; }
+:root[data-theme='light'] { color: #21302c; background: #f4f7f5; }
 * { box-sizing: border-box; }
-body { margin: 0; min-width: 320px; background: #0b0f10; }
+body { margin: 0; min-width: 320px; background: #0b0f10; transition: background-color 0.25s ease, color 0.25s ease; }
+:root[data-theme='light'] body { background: #f4f7f5; }
 button, a { font: inherit; }

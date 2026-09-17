@@ -30,5 +30,14 @@ export const routes: Routes = [
     /** Lazily loads the goals page after authentication succeeds. */
     loadComponent: () => import('./pages/goals/goals-page').then(({ GoalsPage }) => GoalsPage),
   },
+  {
+    path: 'prevision-annuelle',
+    canActivate: [authGuard],
+    /** Lazily loads the annual forecast page after authentication succeeds. */
+    loadComponent: () =>
+      import('./pages/annual-forecast/annual-forecast-page').then(
+        ({ AnnualForecastPage }) => AnnualForecastPage,
+      ),
+  },
   { path: '**', redirectTo: 'dashboard' },
 ];

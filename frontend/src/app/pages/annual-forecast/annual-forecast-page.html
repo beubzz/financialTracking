@@ -1,0 +1,171 @@
+<app-layout eyebrow="Synthèse annuelle" [title]="'Prévision ' + year()">
+  <button
+    class="profile-button"
+    type="button"
+    layout-actions
+    (click)="logout()"
+    aria-label="Se déconnecter"
+  >
+    <span>TB</span><strong>Se déconnecter</strong><small>↪</small>
+  </button>
+
+  <div class="year-row">
+    <div>
+      <p class="eyebrow">Votre année financière</p>
+      <h2>
+        Prévision annuelle <span>{{ year() }}</span>
+      </h2>
+      <p class="intro">
+        Les douze mois réunis pour voir vos revenus, vos postes de dépenses et votre marge
+        disponible en un coup d'œil.
+      </p>
+    </div>
+    <div class="year-controls">
+      <button
+        class="year-button"
+        type="button"
+        (click)="changeYear(-1)"
+        aria-label="Année précédente"
+      >
+        <svg lucideChevronLeft aria-hidden="true" size="17"></svg>
+      </button>
+      <button class="year-button" type="button" (click)="changeYear(1)" aria-label="Année suivante">
+        <svg lucideChevronRight aria-hidden="true" size="17"></svg>
+      </button>
+      <button
+        class="refresh-button"
+        type="button"
+        (click)="loadYear()"
+        aria-label="Actualiser la prévision"
+      >
+        <svg lucideRefreshCw aria-hidden="true" size="15"></svg><span>Actualiser</span>
+      </button>
+    </div>
+  </div>
+
+  @if (error()) {
+    <div class="error-banner" role="alert">
+      {{ error() }} <button type="button" (click)="loadYear()">Réessayer</button>
+    </div>
+  }
+
+  @if (loading()) {
+    <section class="loading-panel panel">
+      <span class="loading-mark"></span><strong>Chargement de votre année...</strong>
+    </section>
+  } @else {
+    <section class="metric-grid">
+      <article class="metric-card accent">
+        <span class="metric-label">Salaire cumulé</span
+        ><strong>{{ formatAmount(totalSalary()) }}</strong
+        ><small>{{ formatAmount(totalSalary() / 12) }} en moyenne par mois</small>
+      </article>
+      <article class="metric-card">
+        <span class="metric-label">Dépenses prévues</span
+        ><strong>{{ formatAmount(totalExpenses()) }}</strong
+        ><small>{{ formatAmount(averageExpenses()) }} en moyenne par mois</small>
+      </article>
+      <article class="metric-card" [class.metric-negative]="totalRemaining() < 0">
+        <span class="metric-label">Disponible estimé</span
+        ><strong>{{ formatAmount(totalRemaining()) }}</strong
+        ><small>{{ savingsRate() }}% du salaire conservé</small>
+      </article>
+    </section>
+
+    <section class="chart-panel panel">
+      <div class="panel-heading">
+        <div>
+          <p class="eyebrow">01 / Vue d'ensemble</p>
+          <h3>Le rythme de votre année</h3>
+          <p>
+            Les barres empilent chaque poste de dépense ; la ligne verte suit votre salaire mensuel.
+          </p>
+        </div>
+        <span class="year-tag">{{ year() }}</span>
+      </div>
+      <app-annual-chart
+        [labels]="labels()"
+        [salary]="salaries()"
+        [mandatory]="mandatory()"
+        [variable]="variable()"
+        [pleasure]="pleasure()"
+        [investment]="investment()"
+      />
+    </section>
+
+    <section class="insight-grid">
+      <article class="panel insight-card">
+        <p class="eyebrow">02 / À retenir</p>
+        <h3>Votre mois le plus confortable</h3>
+        <strong>{{ bestMonth()?.label || '—' }}</strong>
+        <p>
+          {{
+            bestMonth()
+              ? formatAmount(bestMonth()!.remaining) + ' de marge estimée'
+              : 'Aucune donnée disponible'
+          }}
+        </p>
+      </article>
+      <article class="panel insight-card">
+        <p class="eyebrow">03 / Poste dominant</p>
+        <h3>Le plus gros poste annuel</h3>
+        <strong>{{ largestSection()[0] }}</strong>
+        <p>{{ formatAmount(largestSection()[1]) }} sur l'ensemble de l'année</p>
+      </article>
+      <article class="panel insight-card">
+        <p class="eyebrow">04 / Équilibre</p>
+        <h3>Marge disponible</h3>
+        <strong [class.negative-text]="totalRemaining() < 0">{{
+          totalRemaining() >= 0 ? 'Positive' : 'À surveiller'
+        }}</strong>
+        <p>
+          {{
+            totalRemaining() >= 0
+              ? 'Votre prévision reste dans les limites du salaire cumulé.'
+              : 'Les dépenses prévues dépassent les revenus cumulés.'
+          }}
+        </p>
+      </article>
+    </section>
+
+    <section class="detail-panel panel">
+      <div class="panel-heading">
+        <div>
+          <p class="eyebrow">05 / Détail mensuel</p>
+          <h3>Les douze mois en détail</h3>
+        </div>
+        <span class="detail-note">Tous les montants sont prévisionnels</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Mois</th>
+              <th>Salaire</th>
+              <th>Obligatoire</th>
+              <th>Variable</th>
+              <th>Plaisir</th>
+              <th>Investissement</th>
+              <th>Disponible</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (month of months(); track month.label) {
+              <tr>
+                <th>{{ month.label }}</th>
+                <td>{{ formatAmount(month.salary) }}</td>
+                <td>{{ formatAmount(month.mandatory) }}</td>
+                <td>{{ formatAmount(month.variable) }}</td>
+                <td>{{ formatAmount(month.pleasure) }}</td>
+                <td>{{ formatAmount(month.investment) }}</td>
+                <td [class.negative-text]="month.remaining < 0">
+                  {{ formatAmount(month.remaining) }}
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+  }
+</app-layout>

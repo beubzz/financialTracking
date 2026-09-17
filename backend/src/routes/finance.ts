@@ -55,6 +55,24 @@ router.get("/month", async (request: AuthenticatedRequest, response) => {
   return response.json({ month });
 });
 
+router.get("/annual", async (request: AuthenticatedRequest, response) => {
+  const requestedYear = Number(request.query.year);
+  const year = Number.isInteger(requestedYear) && requestedYear >= 2000
+    ? requestedYear
+    : new Date().getUTCFullYear();
+  const start = new Date(Date.UTC(year, 0, 1));
+  const end = new Date(Date.UTC(year + 1, 0, 1));
+  const months = await prisma.financialMonth.findMany({
+    where: {
+      userId: request.userId!,
+      month: { gte: start, lt: end },
+    },
+    include: { entries: { orderBy: { createdAt: "asc" } } },
+    orderBy: { month: "asc" },
+  });
+  return response.json({ year, months });
+});
+
 router.patch("/salary", async (request: AuthenticatedRequest, response) => {
   const parsed = salarySchema.safeParse(request.body);
   if (!parsed.success)

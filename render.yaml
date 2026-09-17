@@ -5,6 +5,10 @@ services:
     rootDir: frontend
     buildCommand: npm ci && npm run build
     staticPublishPath: dist/frontend/browser
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
 
   - type: web
     name: financial-tracking-api
@@ -21,7 +25,7 @@ services:
       - key: JWT_SECRET
         generateValue: true
       - key: FRONTEND_URL
-        sync: false
+        value: https://ledgerly-btd8.onrender.com
       - key: NODE_VERSION
         value: 22.22.3
 

@@ -18,6 +18,14 @@ export interface ApiEntry {
 export interface MonthResponse {
   month: { entries: ApiEntry[] };
 }
+export interface AnnualMonth {
+  month: string;
+  entries: ApiEntry[];
+}
+export interface AnnualResponse {
+  year: number;
+  months: AnnualMonth[];
+}
 export interface Goal {
   id: string;
   name: string;
@@ -40,6 +48,20 @@ export class FinanceService {
     return firstValueFrom(
       this.http.get<MonthResponse>(`${environment.apiUrl}/finance/month`, {
         params: month ? { month } : {},
+      }),
+    );
+  }
+
+  /**
+   * Loads every persisted financial month in a calendar year.
+   *
+   * @param year The calendar year to load.
+   * @returns A promise containing the year and its available months.
+   */
+  getAnnual(year: number): Promise<AnnualResponse> {
+    return firstValueFrom(
+      this.http.get<AnnualResponse>(`${environment.apiUrl}/finance/annual`, {
+        params: { year },
       }),
     );
   }

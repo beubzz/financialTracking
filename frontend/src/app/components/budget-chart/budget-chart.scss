@@ -24,6 +24,7 @@
   display: grid;
   place-content: center;
   justify-items: center;
+  z-index: 2;
   pointer-events: none;
 }
 
@@ -41,10 +42,10 @@
   text-transform: uppercase;
 }
 
-[data-theme='light'] .budget-chart-center strong {
+:host-context([data-theme='light']) .budget-chart-center strong {
   color: #21302c;
 }
 
-[data-theme='light'] .budget-chart-center small {
+:host-context([data-theme='light']) .budget-chart-center small {
   color: #6b8178;
 }

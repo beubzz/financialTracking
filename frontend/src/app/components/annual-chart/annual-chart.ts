@@ -53,6 +53,7 @@ export class AnnualChartComponent implements AfterViewInit, OnDestroy {
   readonly investment = input.required<number[]>();
   private readonly canvas = viewChild.required<ElementRef<HTMLCanvasElement>>('canvas');
   private chart?: Chart;
+  private themeObserver?: MutationObserver;
   private viewReady = false;
 
   /**
@@ -73,6 +74,11 @@ export class AnnualChartComponent implements AfterViewInit, OnDestroy {
    */
   ngAfterViewInit(): void {
     this.viewReady = true;
+    this.themeObserver = new MutationObserver(() => this.updateChart());
+    this.themeObserver.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['data-theme'],
+    });
     this.updateChart();
   }
 
@@ -82,6 +88,7 @@ export class AnnualChartComponent implements AfterViewInit, OnDestroy {
    * @returns Nothing; the chart is destroyed as a side effect.
    */
   ngOnDestroy(): void {
+    this.themeObserver?.disconnect();
     this.chart?.destroy();
   }
 
@@ -91,6 +98,13 @@ export class AnnualChartComponent implements AfterViewInit, OnDestroy {
    * @returns Nothing; the chart data and options are updated in place.
    */
   private updateChart(): void {
+    const isLightTheme = document.documentElement.dataset['theme'] === 'light';
+    const chartTextColor = isLightTheme ? '#527168' : '#78958a';
+    const chartLegendColor = isLightTheme ? '#466258' : '#b8cbc4';
+    const chartGridColor = isLightTheme ? 'rgba(82, 113, 104, 0.16)' : 'rgba(120, 149, 138, 0.16)';
+    const tooltipBackground = isLightTheme ? '#ffffff' : '#172621';
+    const tooltipBorder = isLightTheme ? '#cbdcd4' : '#385148';
+    const tooltipTextColor = isLightTheme ? '#21302c' : '#e9f0ee';
     const datasets: AnnualDataset[] = [
       this.barDataset('Obligatoire', this.mandatory(), '#8fa8e8'),
       this.barDataset('Variable', this.variable(), '#79b8c8'),
@@ -122,14 +136,14 @@ export class AnnualChartComponent implements AfterViewInit, OnDestroy {
             x: {
               stacked: true,
               grid: { display: false },
-              ticks: { color: '#78958a', font: { family: 'DM Mono', size: 10 } },
+              ticks: { color: chartTextColor, font: { family: 'DM Mono', size: 10 } },
             },
             y: {
               stacked: true,
               beginAtZero: true,
-              grid: { color: 'rgba(120, 149, 138, 0.16)' },
+              grid: { color: chartGridColor },
               ticks: {
-                color: '#78958a',
+                color: chartTextColor,
                 font: { family: 'DM Mono', size: 10 },
                 callback: (value) => `${Number(value).toLocaleString('fr-FR')} €`,
               },
@@ -139,16 +153,18 @@ export class AnnualChartComponent implements AfterViewInit, OnDestroy {
             legend: {
               position: 'bottom',
               labels: {
-                color: '#b8cbc4',
+                color: chartLegendColor,
                 usePointStyle: true,
                 padding: 18,
                 font: { family: 'Manrope', size: 10 },
               },
             },
             tooltip: {
-              backgroundColor: '#172621',
-              borderColor: '#385148',
+              backgroundColor: tooltipBackground,
+              borderColor: tooltipBorder,
               borderWidth: 1,
+              titleColor: tooltipTextColor,
+              bodyColor: tooltipTextColor,
               callbacks: {
                 label: (context) =>
                   ` ${context.dataset.label}: ${this.formatAmount(Number(context.raw))}`,

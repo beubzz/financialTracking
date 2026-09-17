@@ -34,46 +34,6 @@
   letter-spacing: -0.04em;
 }
 
-.field-label {
-  display: block;
-  margin: 0 0 7px;
-  color: #849793;
-  font-family: 'DM Mono', monospace;
-  font-size: 9px;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-}
-
-.text-input {
-  display: block;
-  width: 100%;
-  min-height: 38px;
-  margin: 0 0 19px;
-  border: 1px solid #30403e;
-  border-radius: 5px;
-  padding: 10px 12px;
-  outline: 0;
-  appearance: none;
-  color: #dce9e5;
-  background: #17201f;
-  font: inherit;
-  font-size: 11px;
-  line-height: 1.2;
-  transition:
-    border-color 0.2s ease,
-    box-shadow 0.2s ease,
-    background-color 0.2s ease;
-}
-
-.text-input:focus {
-  border-color: #82dda9;
-  box-shadow: 0 0 0 2px rgb(130 221 169 / 12%);
-}
-
-.text-input::placeholder {
-  color: #657773;
-}
-
 .close-button {
   align-self: start;
   border: 0;
@@ -199,28 +159,37 @@ fieldset {
   line-height: 1.5;
 }
 
-[data-theme='light'] .expense-modal {
+:host-context([data-theme='light']) .expense-modal {
   border-color: #d5e2dc;
   background: #ffffff;
   box-shadow: 0 24px 70px rgb(38 67 56 / 10%);
 }
 
-[data-theme='light'] .modal-header h2 {
+:host-context([data-theme='light']) .modal-header h2 {
   color: #21302c;
 }
 
-[data-theme='light'] .field-label {
-  color: #466258;
+:host-context([data-theme='light']) .close-button {
+  color: #527168;
 }
 
-[data-theme='light'] .text-input {
+:host-context([data-theme='light']) .subentry-context {
+  color: #6b8178;
+}
+
+:host-context([data-theme='light']) .subentry-context strong {
+  color: #80538f;
+}
+
+:host-context([data-theme='light']) .radio-group label {
   border-color: #cbdcd4;
-  color: #21302c;
-  background: #fbfdfc;
+  color: #607970;
 }
 
-[data-theme='light'] .text-input::placeholder {
-  color: #80958c;
+:host-context([data-theme='light']) .radio-group label.selected {
+  border-color: #78b493;
+  color: #35614c;
+  background: #e5f4eb;
 }
 
 :host-context([data-theme='light']) .parent-select {
@@ -243,7 +212,7 @@ fieldset {
   background: #ffffff !important;
 }
 
-[data-theme='light'] .modal-backdrop {
+:host-context([data-theme='light']) .modal-backdrop {
   background: rgb(33 48 44 / 34%);
 }
 

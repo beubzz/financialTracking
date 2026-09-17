@@ -25,30 +25,96 @@
   </section>
   <div class="goal-grid">
     @for (goal of goals(); track goal.id) {
-      <article class="panel goal-card">
+      <article class="panel goal-card" [class.goal-complete]="isComplete(goal)">
         <div class="goal-card-heading">
           <div>
             <p class="eyebrow">Objectif</p>
             <h3>{{ goal.name }}</h3>
           </div>
-          <button
-            class="delete-button"
-            type="button"
-            (click)="deleteGoal(goal.id)"
-            aria-label="Supprimer l’objectif"
-          >
-            ×
-          </button>
+          <div class="goal-actions">
+            <button
+              class="goal-adjust-button add"
+              type="button"
+              [disabled]="!canAdd(goal)"
+              (click)="openAdjustment(goal, 'add')"
+              [attr.aria-label]="'Ajouter de l’épargne à ' + goal.name"
+            >
+              +
+            </button>
+            <button
+              class="goal-adjust-button remove"
+              type="button"
+              [disabled]="!canRemove(goal)"
+              (click)="openAdjustment(goal, 'remove')"
+              [attr.aria-label]="'Retirer de l’épargne de ' + goal.name"
+            >
+              −
+            </button>
+            <button
+              class="delete-button"
+              type="button"
+              (click)="deleteGoal(goal.id)"
+              aria-label="Supprimer l’objectif"
+            >
+              ×
+            </button>
+          </div>
         </div>
         <strong class="goal-amount"
           >{{ format(goal.saved) }} <small>/ {{ format(goal.target) }}</small></strong
         >
         <div class="goal-progress"><i [style.width.%]="progress(goal)"></i></div>
-        <span class="goal-percent">{{ progress(goal) }}% atteint</span>
+        <span class="goal-percent">
+          {{ isComplete(goal) ? 'Objectif atteint, c’est fait !' : progress(goal) + '% atteint' }}
+        </span>
       </article>
     }
     @if (!goals().length) {
       <p class="list-empty">Créez votre premier objectif d’épargne.</p>
     }
   </div>
+  @if (adjustmentGoal(); as goal) {
+    <div class="goal-modal-backdrop" (click)="closeAdjustment()">
+      <section
+        class="goal-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="goal-adjustment-title"
+        (click)="$event.stopPropagation()"
+      >
+        <p class="eyebrow">{{ adjustmentMode() === 'add' ? 'Nouvelle épargne' : 'Retrait' }}</p>
+        <h2 id="goal-adjustment-title">
+          {{ adjustmentMode() === 'add' ? 'Ajouter à l’objectif' : 'Retirer de l’objectif' }}
+        </h2>
+        <p class="goal-modal-copy">
+          Épargne actuelle : <strong>{{ format(goal.saved) }}</strong>
+        </p>
+        <label class="field-label" for="goal-adjustment-amount">Montant</label>
+        <input
+          class="text-input"
+          id="goal-adjustment-amount"
+          type="number"
+          min="0.01"
+          [max]="adjustmentLimit(goal)"
+          step="0.01"
+          [(ngModel)]="adjustmentAmount"
+          autofocus
+        />
+        <p class="goal-modal-limit">Maximum : {{ format(adjustmentLimit(goal)) }}</p>
+        <div class="goal-modal-actions">
+          <button class="cancel-button" type="button" (click)="closeAdjustment()">Annuler</button>
+          <button
+            class="primary-button"
+            type="button"
+            [disabled]="
+              adjusting() || !adjustmentAmount || adjustmentAmount > adjustmentLimit(goal)
+            "
+            (click)="saveAdjustment()"
+          >
+            {{ adjusting() ? 'Enregistrement...' : 'Confirmer' }}
+          </button>
+        </div>
+      </section>
+    </div>
+  }
 </app-layout>

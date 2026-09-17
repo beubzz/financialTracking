@@ -498,6 +498,87 @@
   font-size: 11px;
 }
 
+:host-context([data-theme='light']) .collapse-button.mandatory,
+:host-context([data-theme='light']) .add-button.mandatory {
+  border-color: #b7c5eb;
+  color: #536da8;
+  background: #f1f4ff;
+}
+
+:host-context([data-theme='light']) .collapse-button.variable,
+:host-context([data-theme='light']) .add-button.variable {
+  border-color: #9acbd3;
+  color: #397f8d;
+  background: #eff9fb;
+}
+
+:host-context([data-theme='light']) .collapse-button.pleasure,
+:host-context([data-theme='light']) .add-button.pleasure {
+  border-color: #d0b4d8;
+  color: #80538f;
+  background: #faf3fc;
+}
+
+:host-context([data-theme='light']) .collapse-button.investment,
+:host-context([data-theme='light']) .add-button.investment {
+  border-color: #8fd0a8;
+  color: #2d8b57;
+  background: #eefbf2;
+}
+
+:host-context([data-theme='light']) .collapse-button.mandatory:hover,
+:host-context([data-theme='light']) .add-button.mandatory:hover {
+  background: #e5eafe;
+}
+
+:host-context([data-theme='light']) .collapse-button.variable:hover,
+:host-context([data-theme='light']) .add-button.variable:hover {
+  background: #e1f4f6;
+}
+
+:host-context([data-theme='light']) .collapse-button.pleasure:hover,
+:host-context([data-theme='light']) .add-button.pleasure:hover {
+  background: #f2e5f5;
+}
+
+:host-context([data-theme='light']) .collapse-button.investment:hover,
+:host-context([data-theme='light']) .add-button.investment:hover {
+  background: #dff6e7;
+}
+
+:host-context([data-theme='light']) .subentry-button {
+  border-color: #9acbd3;
+  color: #397f8d;
+  background: #eff9fb;
+}
+
+:host-context([data-theme='light']) .pleasure-block .subentry-button {
+  border-color: #d0b4d8;
+  color: #80538f;
+  background: #faf3fc;
+}
+
+:host-context([data-theme='light']) .subentry-button:hover {
+  background: #e1f4f6;
+}
+
+:host-context([data-theme='light']) .pleasure-block .subentry-button:hover {
+  background: #f2e5f5;
+}
+
+:host-context([data-theme='light']) .section-title h3,
+:host-context([data-theme='light']) .entry-name strong {
+  color: #21302c;
+}
+
+:host-context([data-theme='light']) .section-title p:not(.eyebrow),
+:host-context([data-theme='light']) .entry-name small,
+:host-context([data-theme='light']) .entry-amount-item small,
+:host-context([data-theme='light']) .subentry-heading,
+:host-context([data-theme='light']) .subentry-count {
+  color: #587269;
+}
+
 @media (max-width: 800px) {
   .section-block {
     padding: 23px 20px 17px;

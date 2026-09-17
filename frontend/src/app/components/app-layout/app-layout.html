@@ -1,22 +1,49 @@
 <main class="app-shell">
-  <aside class="sidebar">
+  <button
+    class="menu-backdrop"
+    type="button"
+    aria-label="Fermer le menu"
+    [class.is-visible]="isMenuOpen()"
+    (click)="closeMenu()"
+  ></button>
+  <aside class="sidebar" [class.is-open]="isMenuOpen()">
     <div class="brand"><span class="brand-mark">$</span><span>Ledgerly</span></div>
+    <button
+      class="menu-close"
+      type="button"
+      aria-label="Fermer le menu"
+      title="Fermer le menu"
+      (click)="closeMenu()"
+    >
+      <svg lucideX aria-hidden="true" size="18"></svg>
+    </button>
     <nav aria-label="Navigation principale">
       <a
         class="nav-item"
         routerLink="/dashboard"
         routerLinkActive="active"
         [routerLinkActiveOptions]="{ exact: true }"
+        (click)="closeMenu()"
       >
         <span aria-hidden="true">◈</span>Vue d'ensemble
       </a>
-      <a class="nav-item" routerLink="/transactions" routerLinkActive="active">
+      <a
+        class="nav-item"
+        routerLink="/transactions"
+        routerLinkActive="active"
+        (click)="closeMenu()"
+      >
         <span aria-hidden="true">▤</span>Transactions
       </a>
-      <a class="nav-item" routerLink="/objectifs" routerLinkActive="active">
+      <a class="nav-item" routerLink="/objectifs" routerLinkActive="active" (click)="closeMenu()">
         <span aria-hidden="true">⌁</span>Objectifs
       </a>
-      <a class="nav-item" routerLink="/prevision-annuelle" routerLinkActive="active">
+      <a
+        class="nav-item"
+        routerLink="/prevision-annuelle"
+        routerLinkActive="active"
+        (click)="closeMenu()"
+      >
         <span aria-hidden="true">▥</span>Prévision Annuel
       </a>
     </nav>
@@ -24,6 +51,19 @@
   </aside>
   <section class="content-area">
     <header class="topbar">
+      <button
+        class="menu-toggle"
+        type="button"
+        aria-label="Ouvrir le menu"
+        title="Ouvrir le menu"
+        (click)="toggleMenu()"
+      >
+        @if (isMenuOpen()) {
+          <svg lucideX aria-hidden="true" size="20"></svg>
+        } @else {
+          <svg lucideMenu aria-hidden="true" size="20"></svg>
+        }
+      </button>
       <div>
         <p class="eyebrow">{{ eyebrow() }}</p>
         <h1>{{ title() }}</h1>

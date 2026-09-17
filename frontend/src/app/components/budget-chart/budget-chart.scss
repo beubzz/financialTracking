@@ -8,14 +8,14 @@
 .budget-chart-canvas {
   position: relative;
   z-index: 1;
-  width: 256px;
-  height: 256px;
+  width: 100%;
+  height: 100%;
 }
 
 .budget-chart-canvas canvas {
   display: block;
-  width: 256px !important;
-  height: 256px !important;
+  width: 100% !important;
+  height: 100% !important;
 }
 
 .budget-chart-center {
@@ -48,4 +48,12 @@
 
 :host-context([data-theme='light']) .budget-chart-center small {
   color: #6b8178;
+}
+
+@media (max-width: 560px) {
+  :host {
+    flex: 0 1 220px;
+    width: min(220px, 100%);
+    height: min(220px, 100vw - 48px);
+  }
 }

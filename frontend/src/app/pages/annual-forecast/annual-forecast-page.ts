@@ -109,7 +109,7 @@ export class AnnualForecastPage {
       this.months.set(this.buildSummaries(response.months, response.year));
     } catch {
       this.error.set(
-        "Impossible de charger la prévision annuelle. Vérifiez que l'API est disponible.",
+        "Impossible de charger les données annuelles. Vérifiez que l'API est disponible.",
       );
     } finally {
       this.loading.set(false);
@@ -178,14 +178,23 @@ export class AnnualForecastPage {
       pleasure: 0,
       investment: 0,
     };
-    entries.forEach((entry) => {
-      const amount = Number(entry.amount);
-      if (entry.type === 'INCOME') {
-        totals.salary += amount;
-      } else if (entry.section.toLowerCase() in totals) {
-        totals[entry.section.toLowerCase() as Section] += amount;
-      }
-    });
+    entries
+      .filter((entry) => entry.type === 'INCOME')
+      .forEach((entry) => {
+        totals.salary += Number(entry.amount);
+      });
+
+    entries
+      .filter((entry) => entry.type === 'EXPENSE' && !entry.parentId)
+      .forEach((entry) => {
+        const section = entry.section.toLowerCase() as Section;
+        const children = entries.filter((child) => child.parentId === entry.id);
+        const amount =
+          (section === 'variable' || section === 'pleasure') && children.length
+            ? children.reduce((total, child) => total + Number(child.amount), 0)
+            : Number(entry.amount);
+        totals[section] += amount;
+      });
     return totals;
   }
 

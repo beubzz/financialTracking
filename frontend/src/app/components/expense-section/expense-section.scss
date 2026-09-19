@@ -447,6 +447,12 @@
 .investment-text .entry-amount-value {
   color: #68dfa0;
 }
+.actual-amount.actual-under-budget .entry-amount-value {
+  color: #82dda9;
+}
+.actual-amount.actual-over-budget .entry-amount-value {
+  color: #ef8d82;
+}
 
 .edit-button,
 .delete-button {
@@ -517,6 +523,14 @@
   border-color: #d0b4d8;
   color: #80538f;
   background: #faf3fc;
+}
+
+:host-context([data-theme='light']) .actual-under-budget .entry-amount-value {
+  color: #26834a;
+}
+
+:host-context([data-theme='light']) .actual-over-budget .entry-amount-value {
+  color: #c0392b;
 }
 
 :host-context([data-theme='light']) .collapse-button.investment,

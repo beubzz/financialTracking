@@ -63,6 +63,9 @@
         <span>Revenu disponible ce mois</span
         ><strong [class.negative-amount]="remaining() < 0">{{ formatAmount(remaining()) }}</strong>
       </div>
+      <div class="summary-metric spent-metric">
+        <span>Revenu dépensé ce mois</span><strong>{{ formatAmount(totalExpenses()) }}</strong>
+      </div>
       <div class="salary-line"><i [style.width.%]="investRate()"></i></div>
       <small
         >{{ formatAmount(totalExpenses()) }} de dépenses prévues ·

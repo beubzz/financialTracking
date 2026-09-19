@@ -123,6 +123,14 @@
                 [class.variable-text]="section() === 'variable'"
                 [class.pleasure-text]="section() === 'pleasure'"
                 [class.investment-text]="section() === 'investment'"
+                [class.actual-under-budget]="
+                  (section() === 'variable' || section() === 'pleasure') &&
+                  childrenTotal(entry.id) < entry.amount
+                "
+                [class.actual-over-budget]="
+                  (section() === 'variable' || section() === 'pleasure') &&
+                  childrenTotal(entry.id) > entry.amount
+                "
                 ><span class="entry-amount-line"><span class="entry-amount-prefix">-</span
                   ><span class="entry-amount-value">{{ formatAmount(childrenTotal(entry.id)) }}</span></span
                 ><small>réel</small></strong

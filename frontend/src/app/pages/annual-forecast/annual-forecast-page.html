@@ -1,4 +1,4 @@
-<app-layout eyebrow="Synthèse annuelle" [title]="'Prévision ' + year()">
+<app-layout eyebrow="Synthèse annuelle" [title]="'Réel ' + year()">
   <button
     class="profile-button"
     type="button"
@@ -13,7 +13,7 @@
     <div>
       <p class="eyebrow">Votre année financière</p>
       <h2>
-        Prévision annuelle <span>{{ year() }}</span>
+        Réel annuel <span>{{ year() }}</span>
       </h2>
       <p class="intro">
         Les douze mois réunis pour voir vos revenus, vos postes de dépenses et votre marge
@@ -36,7 +36,7 @@
         class="refresh-button"
         type="button"
         (click)="loadYear()"
-        aria-label="Actualiser la prévision"
+        aria-label="Actualiser les données réelles"
       >
         <svg lucideRefreshCw aria-hidden="true" size="15"></svg><span>Actualiser</span>
       </button>
@@ -61,12 +61,12 @@
         ><small>{{ formatAmount(totalSalary() / 12) }} en moyenne par mois</small>
       </article>
       <article class="metric-card">
-        <span class="metric-label">Dépenses prévues</span
+        <span class="metric-label">Dépenses réelles</span
         ><strong>{{ formatAmount(totalExpenses()) }}</strong
         ><small>{{ formatAmount(averageExpenses()) }} en moyenne par mois</small>
       </article>
       <article class="metric-card" [class.metric-negative]="totalRemaining() < 0">
-        <span class="metric-label">Disponible estimé</span
+        <span class="metric-label">Disponible réel</span
         ><strong>{{ formatAmount(totalRemaining()) }}</strong
         ><small>{{ savingsRate() }}% du salaire conservé</small>
       </article>
@@ -78,7 +78,7 @@
           <p class="eyebrow">01 / Vue d'ensemble</p>
           <h3>Le rythme de votre année</h3>
           <p>
-            Les barres empilent chaque poste de dépense ; la ligne verte suit votre salaire mensuel.
+            Les barres présentent chaque poste de dépense réel ; la ligne verte suit votre salaire mensuel.
           </p>
         </div>
         <span class="year-tag">{{ year() }}</span>
@@ -101,7 +101,7 @@
         <p>
           {{
             bestMonth()
-              ? formatAmount(bestMonth()!.remaining) + ' de marge estimée'
+              ? formatAmount(bestMonth()!.remaining) + ' de marge réelle'
               : 'Aucune donnée disponible'
           }}
         </p>
@@ -110,7 +110,7 @@
         <p class="eyebrow">03 / Poste dominant</p>
         <h3>Le plus gros poste annuel</h3>
         <strong>{{ largestSection()[0] }}</strong>
-        <p>{{ formatAmount(largestSection()[1]) }} sur l'ensemble de l'année</p>
+        <p>{{ formatAmount(largestSection()[1]) }} dépensés sur l'ensemble de l'année</p>
       </article>
       <article class="panel insight-card">
         <p class="eyebrow">04 / Équilibre</p>
@@ -121,8 +121,8 @@
         <p>
           {{
             totalRemaining() >= 0
-              ? 'Votre prévision reste dans les limites du salaire cumulé.'
-              : 'Les dépenses prévues dépassent les revenus cumulés.'
+              ? 'Vos dépenses réelles restent dans les limites du salaire cumulé.'
+              : 'Les dépenses réelles dépassent les revenus cumulés.'
           }}
         </p>
       </article>
@@ -134,7 +134,7 @@
           <p class="eyebrow">05 / Détail mensuel</p>
           <h3>Les douze mois en détail</h3>
         </div>
-        <span class="detail-note">Tous les montants sont prévisionnels</span>
+        <span class="detail-note">Tous les montants sont réels</span>
       </div>
       <div class="table-wrap">
         <table>
